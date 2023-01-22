@@ -1,8 +1,10 @@
-const subject = 'Lark Camp 2022 Registration Confirmation';
+import { year } from './dates.js';
+
+const subject = `Lark Camp ${year} Registration Confirmation`;
 const template = `
 Dear {{registration.payment.payer_first_name}} {{registration.payment.payer_last_name}},
 
-Your online registration for Lark Camp 2022 has been received.
+Your online registration for Lark Camp ${year} has been received.
 
 You have registered for:
 
@@ -18,10 +20,8 @@ Parking Pass Purchase - None Yet
 
 TOTAL DUE: \${{pricing_results.total}}
 
-Registration Number: 2022-{{ registration.id }}
+Registration Number: ${year}-{{ registration.id }}
 `;
 
-export default {
-  confirmation_email_template: template,
-  confirmation_email_subject: subject,
-};
+export const confirmation_email_template = template;
+export const confirmation_email_subject = subject;
