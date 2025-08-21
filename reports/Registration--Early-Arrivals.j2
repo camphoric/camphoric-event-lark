@@ -1,4 +1,4 @@
-{%- set early_day = '2024-07-25' -%}
+{%- set early_day = '2025-07-31' -%}
 {%- set parking_short = {
 "Long Term": "LT",
 "Vehicle Camp 1": "V1",
@@ -45,7 +45,7 @@
   (camper.ldg.campers | selectattr('attributes.session', '==', camper.attributes.session) | sort(attribute="sequence,attributes.last_name,attributes.first_name") | first)
   }) if 'Tent' in camper.fullLodgingPath -%}    
 {%- endfor -%} 
-Last, First, Age, Guardian, Forms, Crew, Lodging, Stay, Park, COVID
+Last, First, Age, Guardian, Forms, Crew, Lodging, Stay, Park
 {% for camper in campers | sort(attribute="attributes.last_name") if camper.stay[0] == early_day -%}
   {{ camper.attributes.last_name }},
   {{- camper.attributes.first_name }},
@@ -58,7 +58,7 @@ Last, First, Age, Guardian, Forms, Crew, Lodging, Stay, Park, COVID
   {%- else -%}
     N/A
   {%- endif -%},
-  {{- (camper.crew | replace('', '') | replace('-partial', '') | replace('-full', '')) or '-' }},
+  {{- camper.crew or '-' }},
   {{- camper.lodging_short }},
   {{- session_short[camper.attributes.session] }},
   {{- (
@@ -67,10 +67,5 @@ Last, First, Age, Guardian, Forms, Crew, Lodging, Stay, Park, COVID
   parking_short[camper.parking] +
   ('$' if camper.registration.server_pricing_results.parking > 0 else '')
   ) if camper.registration.attributes.parking_passes else '-'
-  }},
-  {%- if camper.admin_attributes.vaccination_checked -%}
-    Vaxxed
-  {%- else -%}
-    Check Test
-  {%- endif %}
+  }}
 {% endfor -%}
