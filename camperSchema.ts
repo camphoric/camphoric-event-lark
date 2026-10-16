@@ -1,6 +1,6 @@
-import meals from './camperMeals.js';
-import pricing from './pricing/pricing.js';
-import regTemplateVars from './regTemplateVars.js';
+import meals from './camperMeals.ts';
+import pricing from './pricing/pricing.ts';
+import regTemplateVars from './regTemplateVars.ts';
 
 export const sessionTypes = {
   F: 'Full camp',

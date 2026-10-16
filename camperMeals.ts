@@ -1,6 +1,6 @@
-import { mealsLookup } from './pricing/camperPricingLogic.js';
-import pricing from './pricing/pricing.js';
-import regTemplateVars from './regTemplateVars.js';
+import { mealsLookup } from './pricing/camperPricingLogic.ts';
+import pricing from './pricing/pricing.ts';
+import regTemplateVars from './regTemplateVars.ts';
 
 export const mealTypes = [
   'Non-Vegetarian',
@@ -54,7 +54,7 @@ const allOf = [
   }
 ];
 
-const createMeals = (...options) => ({
+const createMeals = (...options: (keyof typeof mealsLookup)[]) => ({
   'type': 'object',
   'title': 'Meal Plans',
   'description': `Meal plans must be fully paid by ${regTemplateVars.meals_due_date}. We cannot accept partial payments. Food prices include sales tax.

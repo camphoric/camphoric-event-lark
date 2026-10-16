@@ -316,16 +316,17 @@ export default {
 
   ...Array.apply(null, Array(35)).map(function () {}).reduce(
     (acc, v, i) => {
-      const cabinNum = (i + 1).toString().padStart(2, '0');
+      const cabinNumber = i + 1;
+      const cabinNum = cabinNumber.toString().padStart(2, '0');
       let capacity = 4;
 
-			// check for 2-bed cabins
-			if (nonExistantCabins2.includes(cabinNum)) {
+			// skip cabins that don't exist
+			if (nonExistantCabins2.includes(cabinNumber)) {
 				return acc;
 			}
 
       // check for 2-bed cabins
-      if (twoBedCabins2.includes(cabinNum)) {
+      if (twoBedCabins2.includes(cabinNumber)) {
         capacity = 2;
       }
 

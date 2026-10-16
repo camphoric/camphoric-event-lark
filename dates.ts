@@ -13,7 +13,7 @@ if (today.month > 7) {
 }
 
 // find last Thursday in July as startDate
-const getStartDate = (d) => {
+const getStartDate = (d: DateTime): DateTime => {
   // Mon - Sun: 1 - 7
   if (d.weekday === 4) return d;
 
@@ -22,7 +22,7 @@ const getStartDate = (d) => {
 
 const startDate = getStartDate(DateTime.fromISO(`${year}-08-01T14:00:00.000-07:00`));
 
-const getRegEnd = (d) => {
+const getRegEnd = (d: DateTime): DateTime => {
   // Mon - Sun: 1 - 7
   // reg ends on the Monday before camp starts
   if (d.weekday === 1) return d;

@@ -1,4 +1,4 @@
-import { year } from './dates.js';
+import { year } from './dates.ts';
 
 const subject = `Lark Camp ${year} Registration Confirmation`;
 // Jinja (SPEC §8.3): `campers`, `registration`, `pricing`, `invoice` and

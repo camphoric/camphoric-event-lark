@@ -1,4 +1,5 @@
-import { regTypes } from '../registrationTypes.js';
+import type { PricingLogicItem } from '../../eventImportObjectSchema.ts';
+import { regTypes } from '../registrationTypes.ts';
 import {
   freeCamp,
   crewCamp,
@@ -6,7 +7,7 @@ import {
   freeBadge,
   freeParking,
   crewParking,
-} from './pricingLists.js';
+} from './pricingLists.ts';
 import _ from 'lodash';
 
 const { difference } = _;
@@ -32,7 +33,9 @@ const defaultCamperAge = ageLookup[65];
 const camperAge = {var: ['camper.age', defaultCamperAge]};
 const regTypeNames = regTypes.map(t => t.name);
 
-const regularTuitionPriceMatrix = [
+type Age = keyof typeof ageLookup;
+
+const regularTuitionPriceMatrix: [Age, string, string][] = [
   [ 65, 'pricing.full_adult',   'pricing.half_adult' ],
   [ 64, 'pricing.full_adult',   'pricing.half_adult' ],
   [ 49, 'pricing.full_adult',   'pricing.half_adult' ],
@@ -42,7 +45,7 @@ const regularTuitionPriceMatrix = [
   [ 4,  'pricing.full_kid',     'pricing.half_kid' ],
 ];
 
-const regularMealsPriceMatrix = [
+const regularMealsPriceMatrix: [Age, string, string, string][] = [
   [ 65, 'pricing.meals_adult_full', 'pricing.meals_adult_dinners', 'pricing.meals_adult_half' ],
   [ 64, 'pricing.meals_adult_full', 'pricing.meals_adult_dinners', 'pricing.meals_adult_half' ],
   [ 49, 'pricing.meals_adult_full', 'pricing.meals_adult_dinners', 'pricing.meals_adult_half' ],
@@ -53,7 +56,7 @@ const regularMealsPriceMatrix = [
 ];
 
 const regType = {var: ['registration.registration_type']};
-const regTypeEquals = (type, price) => {
+const regTypeEquals = (type: string, price?: unknown) => {
   if (!regTypeNames.find(t => t === type)) {
     throw new Error(`regTypeEquals: reg type ${type} does not exist`);
   }
@@ -69,7 +72,7 @@ const regTypeEquals = (type, price) => {
   ];
 };
 
-const regTypeIn = (types, price) => {
+const regTypeIn = (types: string[], price: unknown) => {
   const badRegTypes = difference(types, regTypeNames);
 
   if (badRegTypes.length) {
@@ -84,19 +87,19 @@ const regTypeIn = (types, price) => {
 
 
 // test reg types lists
-[
+([
   ['freeCamp', freeCamp],
   ['crewCamp', crewCamp],
   ['freeMeals', freeMeals],
   ['freeBadge', freeBadge],
   ['freeParking', freeParking],
   ['crewParking', crewParking],
-].forEach(([name, list]) => {
+] as [string, string[]][]).forEach(([name, list]) => {
   list.forEach(ctype => {
     try {
       regTypeEquals(ctype);
     } catch (e) {
-      if (e.message.startsWith('regTypeEquals:')) {
+      if ((e as Error).message.startsWith('regTypeEquals:')) {
         throw new Error(`${ctype} does not exist, found in ${name}`);
       }
     }
@@ -117,7 +120,7 @@ const regularPrice = {
         ...regTypeIn(freeCamp, 0),
         ...regTypeIn(crewCamp, 0),
         // Standard pricing
-        ...regularTuitionPriceMatrix.reduce((acc, [ age, full, half ]) => {
+        ...regularTuitionPriceMatrix.reduce<unknown[]>((acc, [ age, full, half ]) => {
           return [
             ...acc,
             { '===': [ageLookup[age], camperAge] },
@@ -134,7 +137,7 @@ const regularPrice = {
     },{
       // apply talent guest discount
       'if': [
-        ...regularTuitionPriceMatrix.reduce((acc, [ age, full, half ]) => {
+        ...regularTuitionPriceMatrix.reduce<unknown[]>((acc, [ age, full, half ]) => {
           return [
             ...acc,
             {
@@ -156,7 +159,7 @@ const regularPrice = {
     },{
       // apply partial pay discount
       'if': [
-        ...regularTuitionPriceMatrix.reduce((acc, [ age, full, half ]) => {
+        ...regularTuitionPriceMatrix.reduce<unknown[]>((acc, [ age, full, half ]) => {
           return [
             ...acc,
             {
@@ -186,7 +189,7 @@ const regularPrice = {
           {var: ['camper.admin_attributes.instructor_meal_rate']}, 0,
           {var: ['camper.admin_attributes.food_trade_only']}, 0,
           ...regTypeIn(freeMeals, 0),
-          ...regularMealsPriceMatrix.reduce((acc, [ age, full, dinners, half ]) => {
+          ...regularMealsPriceMatrix.reduce<unknown[]>((acc, [ age, full, dinners, half ]) => {
             return [
               ...acc,
               { '===': [ageLookup[age], camperAge] }, {
@@ -304,5 +307,4 @@ export default [
       ]
     }
   }
-];
-
+] satisfies PricingLogicItem[];

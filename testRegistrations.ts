@@ -1,4 +1,5 @@
-import { mealsLookup, ageLookup } from './pricing/camperPricingLogic.js';
+import type { LodgingLookup, SampleRegistration } from '../eventImportObjectSchema.ts';
+import { mealsLookup, ageLookup } from './pricing/camperPricingLogic.ts';
 
 const genderLookup = {
   M: 'Man',
@@ -12,7 +13,21 @@ const mealTypeLookup = {
   'E': 'Vegan',
 };
 
-const registrations = [
+// age, gender, first name, last name, the lodging chosen (camp, type, area),
+// meal plan|meal type (empty for no meals), and who they share lodging with
+type CamperRow = [
+  keyof typeof ageLookup, keyof typeof genderLookup, string, string,
+  string, string, string, string, string?,
+];
+
+interface Household {
+  address: [string, string, string, string];
+  email: string;
+  parking_passes: number;
+  campers: CamperRow[];
+}
+
+const registrations: Household[] = [
   {
     address: ['1234 Easy St', 'Berkeley', 'CA', '94703'],
     email: 'bobross123456@dontsend.com',
@@ -60,7 +75,7 @@ const registrations = [
   },
 ];
 
-function makeRegistration(reg, lodgingMap) {
+function makeRegistration(reg: Household, lodgingMap: LodgingLookup): SampleRegistration {
   return {
     'formData': {
       'payment': {
@@ -80,8 +95,8 @@ function makeRegistration(reg, lodgingMap) {
         'meals': {
           ...(
             !c[7].length ? { meal_plan: 'No meals' } : {
-              meal_plan: mealsLookup[c[7].split('|')[0]],
-              meal_type: mealTypeLookup[c[7].split('|')[1]],
+              meal_plan: mealsLookup[c[7].split('|')[0] as keyof typeof mealsLookup],
+              meal_type: mealTypeLookup[c[7].split('|')[1] as keyof typeof mealTypeLookup],
             }
           )
         },
@@ -116,7 +131,7 @@ function makeRegistration(reg, lodgingMap) {
   };
 }
 
-export default function makeRegistrations(lodgingMap) {
+export default function makeRegistrations(lodgingMap: LodgingLookup): SampleRegistration[] {
   return registrations.map(
     r => makeRegistration(r, lodgingMap)
   );

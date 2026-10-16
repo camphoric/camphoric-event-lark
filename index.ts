@@ -1,29 +1,35 @@
-import camper_schema from './camperSchema.js';
-import confirmation_page_template from './confirmationPageTemplate.js';
-import pre_submit_template from './preSubmitTemplate.js';
-import pricing from './pricing/pricing.js';
-import registration_pricing_logic from './pricing/registrationPricingLogic.js';
-import camper_pricing_logic from './pricing/camperPricingLogic.js';
-import camper_admin_schema from './camperAdminAttributes.js';
-import registration_schema from './registrationSchema.js';
-import registration_types from './registrationTypes.js';
-import registration_ui_schema from './registrationUISchema.js';
-import lodgings from './lodgings.js';
-import reports from './reports.js';
-import makeRegistrations from './testRegistrations.js';
-import registration_template_vars from './regTemplateVars.js';
-import registration_deposit_schema from './registrationDepositSchema.js';
-import registration_admin_schema from './regAdminAttributes.js';
-import { dates, lengthInDays, year } from './dates.js';
+import {
+  savedLodging,
+  type EventImport,
+  type EventModule,
+  type SampleRegGenerator,
+} from '../eventImportObjectSchema.ts';
+import camper_schema from './camperSchema.ts';
+import confirmation_page_template from './confirmationPageTemplate.ts';
+import pre_submit_template from './preSubmitTemplate.ts';
+import pricing from './pricing/pricing.ts';
+import registration_pricing_logic from './pricing/registrationPricingLogic.ts';
+import camper_pricing_logic from './pricing/camperPricingLogic.ts';
+import camper_admin_schema from './camperAdminAttributes.ts';
+import registration_schema from './registrationSchema.ts';
+import registration_types from './registrationTypes.ts';
+import registration_ui_schema from './registrationUISchema.ts';
+import lodgings from './lodgings.ts';
+import reports from './reports.ts';
+import makeRegistrations from './testRegistrations.ts';
+import registration_template_vars from './regTemplateVars.ts';
+import registration_deposit_schema from './registrationDepositSchema.ts';
+import registration_admin_schema from './regAdminAttributes.ts';
+import { dates, lengthInDays, year } from './dates.ts';
 
 import {
   confirmation_email_template,
   confirmation_email_subject,
-} from './confirmationEmailTemplate.js';
+} from './confirmationEmailTemplate.ts';
 
 export const eventName = `Lark Camp ${year}`;
 
-const data = {
+const data: EventImport = {
   organization: 'Lark Traditional Arts',
   event: {
     name: eventName,
@@ -86,8 +92,8 @@ if (process.env.PAYPAL_CLIENT_ID) {
   data.event.epayment_handling = '2.5';
 }
 
-const sampleRegGenerator = async (fetch, results) => {
-  const regs = makeRegistrations(results.lodging);
+const sampleRegGenerator: SampleRegGenerator = async (_fetch, results) => {
+  const regs = makeRegistrations(savedLodging(results));
 
   return regs;
 };
@@ -95,4 +101,4 @@ const sampleRegGenerator = async (fetch, results) => {
 export default {
   data,
   sampleRegGenerator,
-};
+} satisfies EventModule;

@@ -1,9 +1,14 @@
-import * as priceLists from './pricing/pricingLists.js';
-import pricing from './pricing/pricing.js';
+import type { RegistrationType } from '../eventImportObjectSchema.ts';
+
+// A registration type, before its invitation email is added
+type RegTypeBase = Omit<RegistrationType, 'invitation_email_subject' | 'invitation_email_template'>;
+
+import * as priceLists from './pricing/pricingLists.ts';
+import pricing from './pricing/pricing.ts';
 // Invitation emails are Jinja (SPEC §8.4): `invitation` (recipient_name,
 // recipient_email, code, register_url), `registration_type` and `event`.
 
-const createCrewEmailTemplate = (regType) => `
+const createCrewEmailTemplate = (regType: RegTypeBase) => `
 Dear {{ invitation.recipient_name or invitation.recipient_email }},
 
 You have been invited to join the following Lark Camp crew:
@@ -52,7 +57,7 @@ https://www.larkcamp.org
 https://www.larktraditionalarts.org
 `;
 
-const crewEmailTemplateOverrides = {
+const crewEmailTemplateOverrides: Record<string, (regType: RegTypeBase) => string> = {
   'kitchen-full': () => `
 Dear {{ invitation.recipient_name or invitation.recipient_email }},
 
@@ -144,7 +149,7 @@ https://www.larkcamp.org
 https://www.larktraditionalarts.org`,
 };
 
-const specialType = (regType) => ({
+const specialType = (regType: RegTypeBase): RegistrationType => ({
   ...regType,
   invitation_email_subject: `Register for Lark Camp ${regType.label}`,
   invitation_email_template:

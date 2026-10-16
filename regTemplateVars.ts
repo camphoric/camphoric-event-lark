@@ -1,7 +1,7 @@
-import { DateTime } from 'luxon';
-import { dates, lengthInDays } from './dates.js';
+import type { DurationLike } from 'luxon';
+import { dates, lengthInDays } from './dates.ts';
 
-const dt = (add) => {
+const dt = (add: DurationLike) => {
   const d = dates.start.plus(add);
 
   // 'Sat Aug 5th',
