@@ -1,5 +1,5 @@
 import { year } from './dates.ts';
-import countries from '../countries.ts';
+import countries from './countries.ts';
 
 export default {
   'title': `Lark Camp ${year} Registration`,

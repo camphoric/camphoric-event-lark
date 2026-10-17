@@ -1,4 +1,4 @@
-import type { LodgingLookup, Lodgings } from '../eventImportObjectSchema.ts';
+import type { LodgingLookup, Lodgings } from 'camphoric-event-import-spec';
 //event = models.ForeignKey(Event, on_delete=models.CASCADE)
 //parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
 //name = models.CharField(max_length=255)

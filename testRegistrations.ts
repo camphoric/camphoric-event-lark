@@ -1,4 +1,4 @@
-import type { LodgingLookup, SampleRegistration } from '../eventImportObjectSchema.ts';
+import type { LodgingLookup, SampleRegistration } from 'camphoric-event-import-spec';
 import { mealsLookup, ageLookup } from './pricing/camperPricingLogic.ts';
 
 const genderLookup = {
