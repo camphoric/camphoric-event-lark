@@ -83,7 +83,7 @@ const regTypeIn = (types: string[], price: unknown) => {
     { 'in': [regType, types] },
     price,
   ];
-}
+};
 
 
 // test reg types lists
@@ -110,7 +110,7 @@ const regularPrice = {
   enrollment_fee: {
     'if': [
       ...regTypeIn(crewCamp, {var: 'pricing.crew_enrollment'}),
-			0
+      0
     ],
   },
 

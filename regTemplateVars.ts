@@ -17,7 +17,7 @@ const regTemplateVars = {
   full_camp_start_date_time: `${dt({days: 1})} at 3pm`,
   full_camp_end_date_time: `${dt({days: lengthInDays})} at 9am`,
 
-	meals_due_date: 'June 20th',
+  meals_due_date: 'June 20th',
 };
 
 export default regTemplateVars;

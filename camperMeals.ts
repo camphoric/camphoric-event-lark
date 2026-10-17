@@ -35,6 +35,8 @@ const dependencies = {
   }
 };
 
+// Switched off (see the commented-out allOf below), kept for when it returns
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const allOf = [
   {
     if: { properties: { meal_plan: { enum: Object.values(mealsLookup) } } },
@@ -63,9 +65,9 @@ NOTE: You may only cook if you’re camping in a vehicle with a built-in kitchen
 
 | Meal Plan Pricing | adult age 12+ | child ages 0-11 |
 | --- | --- | --- |
-| Full camp, full meals   | \$${pricing.meals_adult_full} adults    | \$${pricing.meals_youth_full} kids |
-| Full camp, just dinners | \$${pricing.meals_adult_dinners} adults | \$${pricing.meals_youth_dinners} kids |
-| Half camp, full meals   | \$${pricing.meals_adult_half} adults    | \$${pricing.meals_youth_half} kids |
+| Full camp, full meals   | $${pricing.meals_adult_full} adults    | $${pricing.meals_youth_full} kids |
+| Full camp, just dinners | $${pricing.meals_adult_dinners} adults | $${pricing.meals_youth_dinners} kids |
+| Half camp, full meals   | $${pricing.meals_adult_half} adults    | $${pricing.meals_youth_half} kids |
 
 Meal plans offer significant savings. You may buy individual meals at camp instead of buying a meal plan. (But it costs more!)`,
   'required': ['meal_plan'],

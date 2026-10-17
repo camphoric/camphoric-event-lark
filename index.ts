@@ -76,14 +76,14 @@ const data: EventImport = {
       label: 'New Camper Referer Discount',
       name: 'new-camper-referer-discount',
     },
-		{
-			label: 'Badge Refund',
-			name: 'badge-refund',
-		},
-		{
-			label: 'Other',
-			name: 'other',
-		},
+    {
+      label: 'Badge Refund',
+      name: 'badge-refund',
+    },
+    {
+      label: 'Other',
+      name: 'other',
+    },
   ]
 };
 

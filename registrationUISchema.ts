@@ -73,7 +73,7 @@ export default {
         'meals',
         'lodging',
         '*',
-				'name_badge',
+        'name_badge',
       ],
       'camper_address': address,
       'meals': {
