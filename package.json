@@ -1,6 +1,6 @@
 {
   "name": "@camphoric/camphoric-event-lark",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lark Traditional Arts' Lark Camp Camphoric event: its import object, organization, reports and bulk registrations.",
   "license": "MIT",
   "repository": {
