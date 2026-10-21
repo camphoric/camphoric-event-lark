@@ -73,7 +73,9 @@ is published), and the newest `@camphoric/camphoric-event-import-spec` and `-too
 within this event's ranges in `package.json`. When it hasn't tested that combination yet, it runs
 `ci.yml` and `e2e.yml` against exactly those versions; the run's summary lists them. A combination
 is tested once, pass or fail (a marker in the Actions cache records it). On Mondays at 14:00 UTC it
-tests regardless, which also catches drift no release causes, such as a new Chrome.
+tests regardless, which also catches drift no release causes, such as a new Chrome, and reports a
+release whose image was never published (a run without the image doesn't record the combination,
+so the first check after the image is published tests it).
 
 A failure opens a **`camphoric-compat`** issue here, or comments on the open one, naming the
 versions tested; so does a note that a package has a version newer than this event's range

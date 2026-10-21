@@ -225,11 +225,15 @@ jobs:
 
       # Pass or fail, the combination is tested: a failure is tracked by the
       # issue, not retried every 6 hours. Saved after the report, so a report
-      # that failed is tried again by the next check. (On a Monday or forced
-      # run the key may exist already, which only logs a warning.)
-      - run: touch .camphoric-tested
+      # that failed is tried again by the next check, and not when the image
+      # wasn't published (a Monday or forced run), so the first check after it
+      # is published tests it. (On a Monday or forced run the key may exist
+      # already, which only logs a warning.)
+      - if: ${{ needs.detect.outputs.image_ready == 'true' }}
+        run: touch .camphoric-tested
 
       - name: Mark these versions tested
+        if: ${{ needs.detect.outputs.image_ready == 'true' }}
         uses: actions/cache/save@v6
         with:
           path: .camphoric-tested
