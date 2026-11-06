@@ -7,7 +7,7 @@ export default {
 Read the [Terms of Registration](http://www.larkcamp.org/campterms.html) before you fill out this form.
 
 Please note that registrations are accepted in the order they are received and
-your camping preferences are processed on a "first-come, first-served basis" basis.  
+your camping preferences are processed on a first-come, first-served basis.  
 
 ### PROOF OF NEGATIVE COVID TEST JUST BEFORE CAMP WILL BE REQUIRED FOR ALL ATTENDEES
 
