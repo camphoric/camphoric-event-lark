@@ -38,10 +38,11 @@ confirmation email, so run it where mail goes to the console, as in local develo
 
 ## End-to-end tests
 
-`e2e/` holds Playwright tests of the registration form, using the harness in
+`e2e/` holds Playwright tests of the registration form and the reports, using the harness in
 `@camphoric/camphoric-event-import-tools/e2e`. Before they run, a throwaway Camphoric starts
 (the release image and Postgres, in Docker, on a free port), this event is imported into it with
-its registration window open, and afterwards the server is removed.
+its registration window open and its sample registrations (`testRegistrations.ts`), and
+afterwards the server is removed.
 
 ```bash
 npx playwright install chromium   # once
@@ -54,9 +55,12 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
 - `CAMPHORIC_IMAGE_TAG` picks the release image's tag (default `latest`, pulled fresh);
   `CAMPHORIC_E2E_IMAGE` names a locally built image instead.
 - `CAMPHORIC_E2E_SERVER_URL`, with `CAMPHORIC_E2E_SERVER_USERNAME` / `_PASSWORD`, imports into
-  a running server instead of starting one.
+  a running server instead of starting one. The sample registrations are imported into it too.
 - Every test, on desktop and mobile Chrome, shares the one imported event, so a registration one
   test completes stays.
+- `e2e/reports.spec.ts` signs in to the admin (as the admin the import used) and opens each
+  report in `reports.ts`, failing on any render error. It checks only that a report renders, not
+  what it says, and runs on desktop Chrome only, since reports render on the server.
 - The `registration` fixture is a page object for the form (fields by label, campers, lodging, the
   price ticker, submitting and paying). The client's markup lives only there, so a change to the
   Camphoric client changes the harness, not these tests.

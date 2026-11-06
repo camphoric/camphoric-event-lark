@@ -1,0 +1,89 @@
+{#- Non-meal income: what campers and registrations were charged for
+    everything except meals, by category, then the grand total. Totals add up
+    each camper's and registration's actual pricing lines, so free campers,
+    discounts and registrar overrides count as charged. Qty counts the campers
+    (or registrations, invoices, passes) with a non-zero amount in that
+    category. Meals and the referrer's registration-scoped meal discount are
+    on Admin, meal income. A camper's total never goes below $0, so a credit
+    bigger than their charges (a campership for a free camper, say) is only
+    partly used: the adjustment row adds back what wasn't, as does a
+    registrar's override of a camper's total. -#}
+{%- set c = namespace(
+    tuition=0, tuition_n=0,
+    enrollment=0, enrollment_n=0,
+    parking=0, parking_n=0,
+    badge=0, badge_n=0,
+    custom=0, custom_n=0,
+    promo=0, promo_n=0,
+    adjust=0, adjust_n=0,
+) -%}
+{%- for camper in campers -%}
+    {%- set p = camper.pricing or {} -%}
+    {%- if p.tuition -%}
+        {%- set c.tuition = c.tuition + p.tuition -%}
+        {%- set c.tuition_n = c.tuition_n + 1 -%}
+    {%- endif -%}
+    {%- if p.enrollment_fee -%}
+        {%- set c.enrollment = c.enrollment + p.enrollment_fee -%}
+        {%- set c.enrollment_n = c.enrollment_n + 1 -%}
+    {%- endif -%}
+    {%- if p.parking -%}
+        {%- set c.parking = c.parking + p.parking -%}
+        {%- set c.parking_n = c.parking_n + (p.parking_pass_count or 0) -%}
+    {%- endif -%}
+    {%- if p.name_badge -%}
+        {%- set c.badge = c.badge + p.name_badge -%}
+        {%- set c.badge_n = c.badge_n + 1 -%}
+    {%- endif -%}
+    {%- if p.custom_charges -%}
+        {%- set c.custom = c.custom + p.custom_charges -%}
+        {%- set c.custom_n = c.custom_n + 1 -%}
+    {%- endif -%}
+    {#- A camper-scoped promo code (first-time camper) comes off tuition -#}
+    {%- if p.promo -%}
+        {%- set c.promo = c.promo + p.promo -%}
+        {%- set c.promo_n = c.promo_n + 1 -%}
+    {%- endif -%}
+    {#- What the camper's total differs from their lines by (meals included,
+        as Admin, meal income counts them as charged) -#}
+    {%- if p.total is not none and p.total is defined -%}
+        {%- set adjust = p.total - ((p.tuition or 0) + (p.enrollment_fee or 0)
+            + (p.meals or 0) + (p.parking or 0) + (p.name_badge or 0)
+            + (p.custom_charges or 0) + (p.promo or 0)) -%}
+        {%- if adjust -%}
+            {%- set c.adjust = c.adjust + adjust -%}
+            {%- set c.adjust_n = c.adjust_n + 1 -%}
+        {%- endif -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{%- set r = namespace(donation=0, donation_n=0, handling=0, handling_n=0) -%}
+{%- for registration in registrations -%}
+    {%- set donation = (registration.pricing or {}).donation -%}
+    {%- if donation -%}
+        {%- set r.donation = r.donation + donation -%}
+        {%- set r.donation_n = r.donation_n + 1 -%}
+    {%- endif -%}
+    {#- The e-payment handling fee is charged on each invoice paid online -#}
+    {%- for invoice in registration.invoices if invoice.handling and not invoice.cancelled_at -%}
+        {%- set r.handling = r.handling + invoice.handling -%}
+        {%- set r.handling_n = r.handling_n + 1 -%}
+    {%- endfor -%}
+{%- endfor -%}
+
+{%- set lines = [
+    ('Tuition', 'campers', c.tuition_n, c.tuition),
+    ('Camper promo code discounts', 'campers', c.promo_n, c.promo),
+    ('Crew enrollment fees', 'campers', c.enrollment_n, c.enrollment),
+    ('Parking passes', 'passes', c.parking_n, c.parking),
+    ('Name badges', 'campers', c.badge_n, c.badge),
+    ('Custom charges', 'campers', c.custom_n, c.custom),
+    ('Camper total adjustments (totals stop at $0)', 'campers', c.adjust_n, c.adjust),
+    ('Donations', 'registrations', r.donation_n, r.donation),
+    ('E-payment handling fees', 'invoices', r.handling_n, r.handling),
+] -%}
+Category,Qty,Counted,Total
+{%- for label, unit, qty, total in lines %}
+{{ label }},{{ qty }},{{ unit }},{{ total | money | csv }}
+{%- endfor %}
+Grand Total,,,{{ lines | map(attribute=3) | sum | money | csv }}
