@@ -1,4 +1,4 @@
-import { expect, type CamperSection, type RegistrationForm } from '@camphoric/camphoric-event-import-tools/e2e';
+import { expect, test, type CamperSection, type RegistrationForm } from '@camphoric/camphoric-event-import-tools/e2e';
 import type { Locator, Page } from '@playwright/test';
 
 // Helpers the specs share. Ones that know the client's markup belong in
@@ -90,11 +90,23 @@ export const addParkingPass = (camper: CamperSection): Locator =>
 export const removeParkingPass = (camper: CamperSection): Locator =>
   camper.root.getByRole('button', { name: 'Remove', exact: true }).and(camper.root.locator('[id*="_parking_passes_"]'));
 
-/** Submits, and expects the form to stay on its registration step. */
+/**
+ * Submits, and expects the form to stay on its registration step. A
+ * submission the server throttles also stays, so it skips the test rather than
+ * passing it (or, in a test.fail, failing it): camphoric/camphoric#985.
+ */
 export async function expectRejected(page: Page, registration: RegistrationForm): Promise<void> {
+  // A submission that passes the form's own checks is posted to the server's
+  // /register (draft saves go to /register/draft); one that doesn't, isn't
+  const posted = page.waitForResponse(
+    r => r.request().method() === 'POST' && /\/events\/\d+\/register$/.test(new URL(r.url()).pathname),
+    { timeout: 5_000 },
+  ).catch(() => null);
   await registration.submit();
-  // (Give a submission that would go through time to leave the step)
-  await page.waitForTimeout(500);
+  const response = await posted;
+  test.skip(response?.status() === 429, 'the server throttled the submission (camphoric/camphoric#985)');
+  // (Give an accepted submission time to move on to the payment step)
+  if (response) await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/\/register\/registration$/);
 }
 

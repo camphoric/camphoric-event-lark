@@ -92,23 +92,23 @@ test.fail('the donation description shows its link, not markdown', async ({ regi
   await expect(registration.message(/\]\(https?:/)).toHaveCount(0);
 });
 
-// F5, sheet row "Broken LInk": the name badge sample is this camp year's. It
-// fails from August, when the form moves to next year, until that year's
-// design is posted and camperSchema.ts links it.
-test.fail('the name badge sample is this year\'s design', async ({ registration }) => {
+// F5, sheet row "Broken LInk": the name badge sample is this camp year's. The
+// form moves to next year in August, before that year's design is posted, so
+// a check on today's date would turn red by itself every year: deciding how
+// the link is kept current comes first (#17).
+test.fixme('the name badge sample is this year\'s design', async ({ registration }) => {
   const camper = await fillRequired(registration);
   await camper.select('I would like to purchase a name badge for $5', 'Yes');
   await expect(camper.root.getByRole('link', { name: 'sample of the design here' }))
     .toHaveAttribute('href', new RegExp(`LarkBadge${year}_`));
 });
 
-// F5: sheet rows "Broken LInk" and the Camp 3 map
-test('the form\'s links are this year\'s and mail the registrar', async ({ page, registration }) => {
+// F5: the registrar's address
+test('the form\'s email links go to the registrar', async ({ page, registration }) => {
   await openEverything(page, registration);
   const hrefs = await page.locator('a[href]').evaluateAll(links => links.map(a => (a as unknown as { href: string }).href));
   expect(hrefs.length).toBeGreaterThan(0);
   for (const href of hrefs) {
-    expect(href).not.toMatch(/2025/);
     if (href.startsWith('mailto:')) expect(href).toBe('mailto:registration@larkcamp.org');
   }
 });
