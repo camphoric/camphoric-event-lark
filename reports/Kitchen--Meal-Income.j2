@@ -28,7 +28,9 @@
 {#- The referrer code is this event's only registration-scoped promo code, and
     it comes off meals only. A camper-scoped code (first-time camper, off
     tuition) puts a promo line on each camper, so a registration whose campers
-    have none used the referrer code. -#}
+    have none used the referrer code. Templates can't see which code was used,
+    so a registration-scoped code an admin adds in Camphoric would land on
+    this row too, and come off the Grand Total. -#}
 {%- set discount = namespace(count=0, total=0) -%}
 {%- for registration in registrations -%}
     {%- set promo = registration.pricing.promo or 0 -%}
@@ -59,5 +61,5 @@ Meal Plan,Tier,Qty,Unit Price,Total
 {%- endfor -%}
 {%- endfor %}
 Other meal charges,,{{ other | length }},,{{ other | sum(attribute='charged') }}
-First-time camper referrer discount,,{{ discount.count }},,{{ discount.total }}
+Referrer promo meal discount (registration-scoped codes),,{{ discount.count }},,{{ discount.total }}
 Grand Total,,{{ counted | length }},,{{ (counted | sum(attribute='charged')) + discount.total }}
