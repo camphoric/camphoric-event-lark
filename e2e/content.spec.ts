@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test';
 
 import { year } from '../dates.ts';
 import regTemplateVars from '../regTemplateVars.ts';
-import { addParkingPass, DONATION, fillRequired, UNFILLED } from './forms.ts';
+import { DONATION, fillRequired, parkingPasses, UNFILLED } from './forms.ts';
 
 // The page's text and links (#14, F). Sources: the "Misc reg form info",
 // "Checking Links" and "Checking Spelling and Grammar" test procedures and the
@@ -17,7 +17,7 @@ async function openEverything(page: Page, registration: Parameters<typeof fillRe
   const camper = await fillRequired(registration);
   await camper.select('I would like to purchase a name badge for $5', 'Yes');
   await camper.select('Willing to help', 'Yes');
-  await addParkingPass(camper).click();
+  await parkingPasses(camper).add();
   await camper.check('This camper\'s address is different than the billing address');
   return camper;
 }

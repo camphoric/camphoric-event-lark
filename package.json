@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@camphoric/camphoric-event-import-spec": "^1.1.0",
-    "@camphoric/camphoric-event-import-tools": "^2.1.0",
+    "@camphoric/camphoric-event-import-tools": "^2.2.0",
     "@eslint/js": "^9.39.5",
     "@jest/globals": "^30.5.2",
     "@playwright/test": "^1.64.1",
