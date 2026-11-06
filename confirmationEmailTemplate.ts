@@ -31,7 +31,7 @@ accommodate your choice.
 {%- set badge = camper.attributes.name_badge or {} -%}
 {{ camper.attributes.first_name }} {{ camper.attributes.last_name }} - {{ camper.attributes.session }}    
 {{ camper.lodging.path_names | join(', ') if camper.lodging else 'none' }}    
-{{ meals.meal_plan }}, {{ meals.meal_type }}: {{ camper.pricing.meals | money }}    
+{{ meals.meal_plan }}{% if meals.meal_type %}, {{ meals.meal_type }}{% endif %}: {{ camper.pricing.meals | money }}    
 {% if badge.purchase -%}
 Name badge ({{ camper.pricing.name_badge | money }}): {{ badge.name }} - {{ badge.pronouns }}     
 {% endif -%}
