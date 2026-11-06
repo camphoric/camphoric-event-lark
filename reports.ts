@@ -68,9 +68,9 @@ const reports: Report[] = [
     template: readFile('Kitchen--Meal-Totals.j2'),
   },
   {
-    title: 'Kitchen, Meal Income',
+    title: 'Admin, meal income',
     output: 'csv',
-    template: readFile('Kitchen--Meal-Income.j2'),
+    template: readFile('Admin--Meal-Income.j2'),
   },
   {
     title: 'Campers, Lodging by Alpha',
