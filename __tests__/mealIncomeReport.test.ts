@@ -10,7 +10,7 @@ import camperPricingLogic, { ageLookup, mealsLookup } from '../pricing/camperPri
 // Camphoric renders the template (Jinja, on the server), so these tests check
 // what it relies on from this package: its meal plans, the pricing variables it
 // reads, and which ages it counts at the child price.
-const report = event.data.reports.find(r => r.title === 'Kitchen, Meal Income');
+const report = event.data.reports.find(r => r.title === 'Admin, meal income');
 const template = report?.template ?? '';
 
 // The template's `plans` list: ('All Meals', 'full'), …
@@ -31,7 +31,7 @@ const mealsPrice = (age: string, mealPlan: string) => jsonLogic.apply(
   },
 );
 
-describe('Kitchen, Meal Income report', () => {
+describe('Admin, meal income report', () => {
   it('is a server-rendered CSV report', () => {
     expect(report).toMatchObject({
       output: 'csv',
