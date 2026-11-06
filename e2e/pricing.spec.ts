@@ -3,14 +3,13 @@ import { expect, test } from '@camphoric/camphoric-event-import-tools/e2e';
 import { ageLookup, mealsLookup } from '../pricing/camperPricingLogic.ts';
 import pricing from '../pricing/pricing.ts';
 import {
-  addParkingPass,
   BADGE,
   buyBadge,
   camperFor,
   DONATION,
   expectRejected,
   fillRequired,
-  removeParkingPass,
+  parkingPasses,
 } from './forms.ts';
 
 // Tuition, meals and extras, as the price ticker adds them up (#14, A and B).
@@ -109,12 +108,13 @@ test('up to 4 parking passes, each charged, and removing them takes them off', a
   const camper = await fillRequired(registration);
   const without = pricing.full_adult;
   await registration.expectTotal(without);
+  const passes = parkingPasses(camper);
   for (let n = 1; n <= 4; n++) {
-    await addParkingPass(camper).click();
+    await passes.add();
     await registration.expectTotal(without + n * pricing.camper_parking_pass);
   }
-  await expect(addParkingPass(camper)).toHaveCount(0);
-  while (await removeParkingPass(camper).count()) await removeParkingPass(camper).first().click();
+  await expect(camper.root.getByRole('button', { name: 'Add A Parking Pass' })).toHaveCount(0);
+  for (let n = 4; n >= 1; n--) await passes.remove(n);
   await registration.expectTotal(without);
   await registration.submit();
   await registration.expectPaymentStep();
@@ -156,7 +156,7 @@ test('a donation can\'t be typed with letters, and adds its dollars', async ({ r
 test('a rejected submission keeps every answer', async ({ page, registration }) => {
   const camper = await fillRequired(registration);
   await buyBadge(camper);
-  await addParkingPass(camper).click();
+  await parkingPasses(camper).add();
   await registration.fill(DONATION, '3.5');
   const total = pricing.full_adult + pricing.name_badge + pricing.camper_parking_pass + 3.5;
   await registration.expectTotal(total);
@@ -165,7 +165,7 @@ test('a rejected submission keeps every answer', async ({ page, registration }) 
   await expect(camper.field(MEALS)).toHaveValue('No meals');
   await expect(camper.field(BADGE)).toHaveValue('Yes');
   await expect(camper.field(SESSION)).toHaveValue('Full camp');
-  await expect(removeParkingPass(camper)).toHaveCount(1);
+  await expect(parkingPasses(camper).items()).toHaveCount(1);
   await expect(registration.field(DONATION)).toHaveValue('$3.5');
   await registration.expectTotal(total);
 });

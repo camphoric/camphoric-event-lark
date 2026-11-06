@@ -2,65 +2,89 @@ import { expect, test } from '@camphoric/camphoric-event-import-tools/e2e';
 
 import { ageLookup, mealsLookup } from '../pricing/camperPricingLogic.ts';
 import pricing from '../pricing/pricing.ts';
-import { addParkingPass, buyBadge, DONATION, fillRequired, money, paymentOption, payByCheckFor } from './forms.ts';
+import {
+  buyBadge,
+  chooseMeals,
+  DONATION,
+  expectDue,
+  fillInvited,
+  fillRequired,
+  money,
+  online,
+  parkingPasses,
+  payByCheck,
+  submitExpectingDue,
+} from './forms.ts';
 
-// The payment step: full payment or a 50% deposit, by check (#14, C). Sources:
-// the "Payment" test procedure, the "donation mis-calculated" thread and the
-// Registration Bugs Feb 2026 sheet.
+// The payment step: full payment or a 50% deposit, by check or online (#14,
+// C). Sources: the "Payment" test procedure, the "donation mis-calculated"
+// thread and the Registration Bugs Feb 2026 sheet.
 //
 // The deposit (registrationDepositSchema.ts) halves only tuition and meals;
-// parking, the badge and the donation are paid in full.
-//
-// The e2e event has no online payment (index.ts enables PayPal, and with it
-// the 2.5% handling, only with PAYPAL_CLIENT_ID), so these pay by check, and
-// the totals have no handling. The tests that need handling or PayPal are
-// fixmes below.
+// parking, the badge and the donation are paid in full. Paying online adds
+// the event's e-payment handling (2.5%) to what's paid now; a check doesn't.
+// The e2e event takes online payments through the harness's fake PayPal
+// (e2e/global-setup.ts), so nothing is paid.
 
-const FULL = 'Full Payment';
 const DEPOSIT = '50% Deposit';
 const deposit = (total: number, tuition: number, meals = 0) => total - tuition / 2 - meals / 2;
 
-// C1, by check: the "Payment" procedure's registration
-test('the payment procedure\'s registration: full payment and deposit', async ({ page, registration }) => {
+// C1: the "Payment" procedure's registration: an adult, full camp, no meals
+// ($943.00 online), 2 parking passes ($1127.50), a badge ($1132.63) and $20
+// ($1153.13)
+test('the payment procedure\'s registration: full payment and deposit', async ({ registration }) => {
   const camper = await fillRequired(registration);
-  await addParkingPass(camper).click();
-  await addParkingPass(camper).click();
+  await parkingPasses(camper).add();
+  await parkingPasses(camper).add();
   await buyBadge(camper);
   await registration.fill(DONATION, '20');
   const total = pricing.full_adult + 2 * pricing.camper_parking_pass + pricing.name_badge + 20;
   await registration.expectTotal(total);
 
-  await registration.submit();
-  await registration.expectPaymentStep();
-  await expect(paymentOption(page, FULL, total)).toBeVisible();
-  await expect(paymentOption(page, DEPOSIT, deposit(total, pricing.full_adult))).toBeVisible();
-  await expect(payByCheckFor(page, total)).toBeVisible();
+  await submitExpectingDue(registration, total);
+  expect(online(total)).toBe(1153.13);
+  // A deposit's handling is on what's paid now. (#14 expects $693.13, the full
+  // online total less half the tuition, which charges handling on the half
+  // that isn't being paid.)
   await registration.choosePaymentOption(DEPOSIT);
-  await expect(payByCheckFor(page, deposit(total, pricing.full_adult))).toBeVisible();
+  await expectDue(registration, deposit(total, pricing.full_adult));
 });
 
-// C2: on 2/18 a deposit added the donation twice
-test('a deposit counts the donation once', async ({ page, registration }) => {
+// C1: going back from the payment step and on again keeps the totals
+test('going back from the payment step keeps its totals', async ({ page, registration }) => {
+  const camper = await fillRequired(registration);
+  await parkingPasses(camper).add();
+  const total = pricing.full_adult + pricing.camper_parking_pass;
+  await submitExpectingDue(registration, total);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/register\/registration$/);
+  await registration.expectTotal(total);
+  await submitExpectingDue(registration, total);
+});
+
+// C2: on 2/18 a deposit added the donation twice. (As in C1, a deposit's
+// handling is on what's paid now: #14 expects $585.50 here and $850.63 with
+// meals, the full online total less the halves, which charges handling on
+// what isn't being paid.)
+test('a deposit counts the donation once', async ({ registration }) => {
   await fillRequired(registration);
   await registration.fill(DONATION, '100');
   const total = pricing.full_adult + 100;
-  await registration.submit();
-  await registration.expectPaymentStep();
-  await expect(paymentOption(page, FULL, total)).toBeVisible();
-  await expect(paymentOption(page, DEPOSIT, deposit(total, pricing.full_adult))).toBeVisible();
+  await submitExpectingDue(registration, total);
+  expect(online(total)).toBe(1045.50);
+  await registration.choosePaymentOption(DEPOSIT);
+  await expectDue(registration, deposit(total, pricing.full_adult));
 });
 
-test('a deposit with meals counts the donation once', async ({ page, registration }) => {
+test('a deposit with meals counts the donation once', async ({ registration }) => {
   const camper = await fillRequired(registration);
-  await camper.select('What meals will you purchase?', mealsLookup.F);
-  await camper.select('What types of meals do you want?', 'Vegetarian');
+  await chooseMeals(camper, mealsLookup.F);
   await registration.fill(DONATION, '100');
   const total = pricing.full_adult + pricing.meals_adult_full + 100;
-  await registration.submit();
-  await registration.expectPaymentStep();
-  await expect(paymentOption(page, FULL, total)).toBeVisible();
-  await expect(paymentOption(page, DEPOSIT, deposit(total, pricing.full_adult, pricing.meals_adult_full)))
-    .toBeVisible();
+  await submitExpectingDue(registration, total);
+  expect(online(total)).toBe(1563.13);
+  await registration.choosePaymentOption(DEPOSIT);
+  await expectDue(registration, deposit(total, pricing.full_adult, pricing.meals_adult_full));
 });
 
 // C3: sheet row "Math on email"; Jed's "Due by June 20th: $-0.5". (The
@@ -71,14 +95,42 @@ test('with no tuition or meals, the deposit is the whole total', async ({ page, 
   await buyBadge(camper);
   await registration.fill(DONATION, '3');
   const total = pricing.name_badge + 3;
-  await registration.submit();
-  await registration.expectPaymentStep();
-  await expect(paymentOption(page, DEPOSIT, total)).toBeVisible();
+  await submitExpectingDue(registration, total);
   await registration.choosePaymentOption(DEPOSIT);
-  await registration.payByCheck();
-  await expect(page).toHaveURL(/\/register\/finished$/);
+  await expectDue(registration, total);
+  await payByCheck(page, registration);
   await expect(page.getByText(`for ${money(total)}`)).toBeVisible();
 });
+
+// C4: sheet row "Rounding Error" (Meghan). Camp 1 cleanup crew in an RV, Just
+// Dinners and a parking pass: $371, $380.275 online
+test('paying by check doesn\'t round the total up', async ({ page, admin, registration }) => {
+  const camper = await fillInvited(page, admin, registration, 'cleanup-camp-1');
+  await camper.chooseLodging('Camp 1', 'RV', 'RV under 15\' long');
+  await chooseMeals(camper, mealsLookup.D);
+  await parkingPasses(camper).add();
+  const total = pricing.crew_enrollment + pricing.meals_adult_dinners + pricing.crew_parking_pass;
+  await registration.expectTotal(total);
+  await submitExpectingDue(registration, total);
+  expect(online(total)).toBe(380.28);
+  await payByCheck(page, registration);
+  await expect(page.getByText(`for ${money(total)}`)).toBeVisible();
+});
+
+// C5: sheet row "payment" (Mahati); M. Jones 2/20: PayPal hung at $1460.63, a
+// half cent before rounding, but not at $943.00
+for (const [what, meals, amount] of [['All Meals', mealsLookup.F, '1460.63'], ['no meals', 'No meals', '943.00']]) {
+  test(`an adult with ${what} can be sent to PayPal, to the cent`, async ({ registration, payPal }) => {
+    const camper = await fillRequired(registration);
+    if (meals !== 'No meals') await chooseMeals(camper, meals);
+    await registration.submit();
+    await registration.expectPaymentStep();
+    const shown = await registration.paymentTotal('online');
+    const order = await payPal.order(await registration.startOnlinePayment());
+    expect(order.amount).toBe(amount);
+    expect(order.amount).toBe(shown.toFixed(2));
+  });
+}
 
 // C7: Madelyn asked whether a full payment is refundable
 test('the payment step explains what the deposit covers', async ({ page, registration }) => {
@@ -88,27 +140,6 @@ test('the payment step explains what the deposit covers', async ({ page, registr
   await expect(page.getByText(/nonrefundable 50% deposit/)).toBeVisible();
   await expect(page.getByText(/balance will be due by June 20/)).toBeVisible();
   await expect(page.getByText(/only applies to tuition and meals/)).toBeVisible();
-});
-
-// C1 with handling: $943.00, +2 passes $1127.50, +badge $1132.63, +$20
-// $1153.13; by check $1125.00; browser Back $1153.13 again; deposit $693.13.
-// C2 with handling: $1045.50 / $585.50, and with All Meals $1563.13 / $850.63.
-test.fixme('e-payment handling is added online and not by check', () => {
-  // Needs an e2e event with online payment (PAYPAL_CLIENT_ID) and the harness's
-  // paymentTotal() (#14, Harness addition 3)
-});
-
-// C4: sheet row "Rounding Error" (Meghan): e.g. Camp 1 cleaning crew in an RV,
-// Just Dinners, a parking pass, whose handled total ends in a half cent
-test.fixme('paying by check doesn\'t round the total up', () => {
-  // Needs handling (above) and an invitation (Harness addition 1)
-});
-
-// C5: sheet row "payment" (Mahati); M. Jones 2/20: PayPal hangs at $1460.63
-// but not $943.00, and on 2/22 still failed after the fix. Write this first.
-test.fixme('every total, half cents included, can be sent to PayPal', () => {
-  // Needs PayPal in the e2e event, and the order amount read from the
-  // order-create request (Harness addition 3): two decimals, equal to the total
 });
 
 // C6: sheet row "Deposit on confirmation page" (👀, "needs more wordsmithing").

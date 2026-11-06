@@ -41,8 +41,10 @@ confirmation email, so run it where mail goes to the console, as in local develo
 `e2e/` holds Playwright tests of the registration form and the reports, using the harness in
 `@camphoric/camphoric-event-import-tools/e2e`. Before they run, a throwaway Camphoric starts
 (the release image and Postgres, in Docker, on a free port), this event is imported into it with
-its registration window open and its sample registrations (`testRegistrations.ts`), and
-afterwards the server is removed.
+its registration window open, its sample registrations (`testRegistrations.ts`) and online
+payment enabled, and afterwards the server is removed. Online payments go to the harness's fake
+PayPal, so nothing is paid, and the throwaway server keeps the email it sends for the tests to
+read.
 
 ```bash
 npx playwright install chromium   # once
@@ -54,8 +56,8 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
 
 - `CAMPHORIC_IMAGE_TAG` picks the release image's tag (default `latest`, pulled fresh);
   `CAMPHORIC_E2E_IMAGE` names a locally built image instead.
-- `CAMPHORIC_E2E_SERVER_URL`, with `CAMPHORIC_E2E_SERVER_USERNAME` / `_PASSWORD`, imports into
-  a running server instead of starting one. The sample registrations are imported into it too.
+- The tests need that throwaway server: its fake PayPal is what lets them pay online, so
+  `CAMPHORIC_E2E_SERVER_URL` (importing into a running server) can't be used for them.
 - Every test, on desktop and mobile Chrome, shares the one imported event, so a registration one
   test completes stays.
 - `e2e/reports.spec.ts` signs in to the admin (as the admin the import used) and opens each
@@ -65,9 +67,12 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
   on desktop Chrome only, since reports render on the server. The warnings come only from what the
   sample registrations reach, and not from pricing results or form answers:
   `__tests__/reportVariables.test.ts` checks those names against the event instead.
-- The `registration` fixture is a page object for the form (fields by label, campers, lodging, the
-  price ticker, submitting and paying). The client's markup lives only there, so a change to the
-  Camphoric client changes the harness, not these tests.
+- The fixtures: `registration`, a page object for the form (fields by label, campers and their
+  lists, lodging, the price ticker, the payment step); `admin`, for invitations and the email the
+  server sent; and `payPal`, the orders sent to the fake PayPal. The client's markup lives only
+  in the harness, so a change to the Camphoric client changes the harness, not these tests.
+- `e2e/forms.ts` holds this event's own helpers: the required answers, opening the form through
+  an invitation, and the amounts due by check and online.
 
 `.github/workflows/e2e.yml` runs them on pull requests, from `upstream.yml` (below), and on
 demand.

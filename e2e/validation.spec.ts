@@ -99,7 +99,7 @@ test('the form says what * means', async ({ registration }) => {
 // D5 ("Misc reg form corner cases" steps 2-9)
 test('a registration needs a camper', async ({ page, registration }) => {
   await fillRequired(registration);
-  await page.getByRole('button', { name: 'Remove', exact: true }).first().click();
+  await registration.removeCamper(1);
   await expect(page.getByRole('heading', { name: '1st Camper', exact: true })).toHaveCount(0);
   await expectRejected(page, registration);
   await expect(page.getByText(messages.campers.minItems).first()).toBeVisible();

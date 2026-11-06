@@ -32,6 +32,9 @@ import {
 
 export const eventName = `Lark Camp ${year}`;
 
+// The handling (percent) added to a payment made online, with PayPal
+export const epaymentHandling = '2.5';
+
 const data: EventImport = {
   organization: 'Lark Traditional Arts',
   event: {
@@ -94,7 +97,7 @@ const data: EventImport = {
 if (process.env.PAYPAL_CLIENT_ID) {
   data.event.paypal_enabled = true;
   data.event.paypal_client_id = process.env.PAYPAL_CLIENT_ID;
-  data.event.epayment_handling = '2.5';
+  data.event.epayment_handling = epaymentHandling;
 }
 
 const sampleRegGenerator: SampleRegGenerator = async (_fetch, results) => {
