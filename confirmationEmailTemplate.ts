@@ -22,7 +22,7 @@ accommodate your choice.
 - If you paid 50% of your tuition, your final payment will be due NO LATER THAN
   JUNE 20. 
 - If you have not yet ordered meals then they also need to be ordered before
-  June 20th by emailing registration@larkcamp.org..
+  June 20th by emailing registration@larkcamp.org.
 
 **YOU HAVE REGISTERED FOR:**
 

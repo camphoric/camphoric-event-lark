@@ -189,7 +189,7 @@ help.
                 'credentials': {
                   'type': 'string',
                   'maxLength': 100,
-                  'title': 'Relevent credentials and certifications',
+                  'title': 'Relevant credentials and certifications',
                 },
               },
               'required': ['skills', 'credentials'],

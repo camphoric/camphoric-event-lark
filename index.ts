@@ -15,6 +15,7 @@ import camper_admin_schema from './camperAdminAttributes.ts';
 import registration_schema from './registrationSchema.ts';
 import registration_types from './registrationTypes.ts';
 import registration_ui_schema from './registrationUISchema.ts';
+import registration_error_messages from './registrationErrorMessages.ts';
 import lodgings from './lodgings.ts';
 import promo_codes from './promoCodes.ts';
 import reports from './reports.ts';
@@ -50,6 +51,7 @@ const data: EventImport = {
     registration_template_vars,
     registration_schema,
     registration_ui_schema,
+    registration_error_messages,
     registration_admin_schema,
     // deposit_schema,
     // deposit_schema,
