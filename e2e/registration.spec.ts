@@ -160,7 +160,5 @@ test('the referrer code takes nothing off without meals', async ({ page, registr
   await registration.expectTotal(920);
 });
 
-// Next, the behaviour particular to this camp:
-test.fixme('each registration type (crew, kitchen, talent, …) changes the fees', () => {});
-test.fixme('a half-camp camper is offered the half-camp meal plans', () => {});
-test.fixme('an RV parking pass and a parking type change its price', () => {});
+// The behaviour particular to this camp is in the other specs: pricing,
+// payment, validation, content, special registrations and emails.

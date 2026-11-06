@@ -5,6 +5,7 @@ type RegTypeBase = Omit<RegistrationType, 'invitation_email_subject' | 'invitati
 
 import * as priceLists from './pricing/pricingLists.ts';
 import pricing from './pricing/pricing.ts';
+import { year } from './dates.ts';
 // Invitation emails are Jinja (SPEC §8.4): `invitation` (recipient_name,
 // recipient_email, code, register_url), `registration_type` and `event`.
 
@@ -61,7 +62,7 @@ const crewEmailTemplateOverrides: Record<string, (regType: RegTypeBase) => strin
   'kitchen-full': () => `
 Dear {{ invitation.recipient_name or invitation.recipient_email }},
 
-Below is your personalized link to register for Lark Camp 2024 as Full Trade Kitchen Crew (includes kitchens, coffeehouses, & bakery).
+Below is your personalized link to register for Lark Camp ${year} as Full Trade Kitchen Crew (includes kitchens, coffeehouses, & bakery).
 
 [Please click here to register!]({{ invitation.register_url }})
 
@@ -97,7 +98,7 @@ https://www.larktraditionalarts.org`,
   'kitchen-partial': () => `
 Dear {{ invitation.recipient_name or invitation.recipient_email }},
 
-Below is your personalized link to register  for Lark Camp 2024 as Partial Pay Kitchen Crew (includes kitchens, coffeehouses, & bakery).
+Below is your personalized link to register  for Lark Camp ${year} as Partial Pay Kitchen Crew (includes kitchens, coffeehouses, & bakery).
 
 [Please click here to register!]({{ invitation.register_url }})
 
