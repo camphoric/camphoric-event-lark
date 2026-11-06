@@ -4,5 +4,6 @@ import { setUpEvent } from '@camphoric/camphoric-event-import-tools/e2e';
 import event from '../index.ts';
 
 // Starts a throwaway Camphoric (or uses CAMPHORIC_E2E_SERVER_URL's), imports
-// this event with its registration open, and removes the server afterwards
-export default setUpEvent({ event, validate: validateEventImport });
+// this event with its registration open and its sample registrations (so the
+// reports have campers to render), and removes the server afterwards
+export default setUpEvent({ event, validate: validateEventImport, withSampleRegistrations: true });
