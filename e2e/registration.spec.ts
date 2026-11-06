@@ -117,7 +117,7 @@ async function applyPromoCode(page: Page, promo: PromoCode) {
   await expect(page.getByText(`Applied: ${promo.label}`)).toBeVisible();
 }
 
-// From promoCodes.ts: $100 off each camper
+// From promoCodes.ts: $100 off each camper's tuition
 test('the first-time camper code takes $100 off each camper', async ({ page, registration }) => {
   await camperFor(registration, 'Full camp');
   const youth = await registration.addCamper();
@@ -128,14 +128,16 @@ test('the first-time camper code takes $100 off each camper', async ({ page, reg
   await registration.expectTotal(920 + 658 - 2 * 100);
 });
 
-test('the first-time camper code takes no more than a camper owes', async ({ page, registration }) => {
+// An under-5 pays no tuition, so their meals aren't discounted
+test('the first-time camper code comes off tuition only', async ({ page, registration }) => {
   await camperFor(registration, 'Full camp');
   const child = await registration.addCamper();
   await child.select('When will you attend?', 'Full camp');
   await child.select('Age (at the beginning of camp)', '0-4 years old');
-  await registration.expectTotal(920);
+  await child.select('What meals will you purchase?', 'All Meals');
+  await registration.expectTotal(920 + 380);
   await applyPromoCode(page, firstTime);
-  await registration.expectTotal(920 - 100);
+  await registration.expectTotal(920 + 380 - 100);
 });
 
 // From promoCodes.ts: $75 off the registration's meals, once

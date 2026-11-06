@@ -116,7 +116,7 @@ versions:
 
 ```bash
 gh workflow run e2e.yml -f image_tag=v0.15.0-rc.1
-gh workflow run e2e.yml -f spec_version=1.0.1 -f tools_version=1.2.1
+gh workflow run e2e.yml -f spec_version=1.1.0 -f tools_version=2.1.0
 gh workflow run ci.yml -f spec_version=1.1.0 -f tools_version=2.1.0
 ```
 

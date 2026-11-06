@@ -41,8 +41,18 @@ describe('promo codes', () => {
       expect(firstTime.scope).toBe('camper');
     });
 
-    it('takes $100 off', () => {
+    it('takes $100 off the tuition', () => {
       expect(discount(firstTime.pricing_logic, { tuition: 920, meals: 505, total: 1425 })).toBe(100);
+    });
+
+    it('takes no more than the tuition, whatever else the camper owes', () => {
+      expect(discount(firstTime.pricing_logic, { tuition: 60, meals: 505, total: 565 })).toBe(60);
+      expect(discount(firstTime.pricing_logic, { tuition: 0, meals: 380, total: 380 })).toBe(0);
+    });
+
+    it('never goes below nothing', () => {
+      expect(discount(firstTime.pricing_logic, { tuition: -50, total: 0 })).toBe(0);
+      expect(discount(firstTime.pricing_logic, { total: 920 })).toBe(0);
     });
   });
 
