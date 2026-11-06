@@ -1,8 +1,8 @@
 {#- Meal income: for each meal plan and price tier, how many campers and what
     they were charged for meals (camper.pricing.meals, the camper's actual
     Meals line). Campers whose meals cost nothing (free-meal registration
-    types, instructor meal rate, food trade) are counted on their plan's Free
-    row. The first-time camper referrer promo code's meal discount is its own
+    types, instructor meal rate, food trade) are left out, so they don't count
+    in the Grand Total either. The first-time camper referrer promo code's meal discount is its own
     row, then the grand total. A registrar's override shows in Total as the
     amount charged, so Total can differ from Qty x Unit Price; an override that
     charges a camper with no meal plan lands on Other meal charges. Prices and
@@ -20,7 +20,7 @@
     {%- set charged = camper.pricing.meals or 0 -%}
     {%- do rows.append({
         'plan': (camper.attributes.meals or {}).meal_plan,
-        'tier': 'Free' if not charged else ('Child' if camper.attributes.age in child_ages else 'Adult'),
+        'tier': 'Child' if camper.attributes.age in child_ages else 'Adult',
         'charged': charged,
     }) -%}
 {%- endfor -%}
@@ -45,7 +45,7 @@
 {%- endfor -%}
 
 {%- set plan_names = plans | map('first') | list -%}
-{%- set paid = rows | selectattr('plan', 'in', plan_names) | list -%}
+{%- set paid = rows | selectattr('plan', 'in', plan_names) | selectattr('charged') | list -%}
 {#- A registrar's override can charge a camper with no meal plan for meals -#}
 {%- set other = rows | rejectattr('plan', 'in', plan_names) | selectattr('charged') | list -%}
 {%- set counted = paid + other -%}
@@ -54,12 +54,11 @@ Meal Plan,Tier,Qty,Unit Price,Total
 {%- for tier, price in [
     ('Adult', event.pricing['meals_adult_' ~ size]),
     ('Child', event.pricing['meals_youth_' ~ size]),
-    ('Free', 0),
 ] -%}
 {%- set matched = paid | selectattr('plan', '==', plan) | selectattr('tier', '==', tier) | list %}
-{{ plan }},{{ tier }},{{ matched | length }},{{ price }},{{ matched | sum(attribute='charged') }}
+{{ plan }},{{ tier }},{{ matched | length }},{{ price | money | csv }},{{ matched | sum(attribute='charged') | money | csv }}
 {%- endfor -%}
 {%- endfor %}
-Other meal charges,,{{ other | length }},,{{ other | sum(attribute='charged') }}
-Referrer promo meal discount (registration-scoped codes),,{{ discount.count }},,{{ discount.total }}
-Grand Total,,{{ counted | length }},,{{ (counted | sum(attribute='charged')) + discount.total }}
+Other meal charges,,{{ other | length }},,{{ other | sum(attribute='charged') | money | csv }}
+Referrer promo meal discount (registration-scoped codes),,{{ discount.count }},,{{ discount.total | money | csv }}
+Grand Total,,{{ counted | length }},,{{ ((counted | sum(attribute='charged')) + discount.total) | money | csv }}
