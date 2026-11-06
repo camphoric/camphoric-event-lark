@@ -22,7 +22,7 @@ scripts/smoke-test-package.sh   # pack it, install it, and load it from its buil
 ```
 
 The event's source is TypeScript; the published package is its build (`dist/`) and its report
-templates (`reports/`). The spec is a **peer dependency** (`^1.0.0`), so Camphoric's importer loads
+templates (`reports/`). The spec is a **peer dependency** (`^1.1.0`), so Camphoric's importer loads
 one copy of it for every event; a spec major this event doesn't follow fails to install rather than
 nesting a second copy. Camphoric's `RELEASE.md` ("What a spec version means") describes how a new
 spec major is rolled out.
@@ -117,7 +117,7 @@ versions:
 ```bash
 gh workflow run e2e.yml -f image_tag=v0.15.0-rc.1
 gh workflow run e2e.yml -f spec_version=1.0.1 -f tools_version=1.2.1
-gh workflow run ci.yml -f spec_version=1.0.1 -f tools_version=1.2.1
+gh workflow run ci.yml -f spec_version=1.1.0 -f tools_version=2.1.0
 ```
 
 A version outside this event's range works too, such as a new major or a pre-release
@@ -128,7 +128,7 @@ installs the packed package with the `spec_version` given (`tools_version` doesn
 the package doesn't depend on the tools). To do the same locally:
 
 ```bash
-SPEC_VERSION=1.0.0 scripts/smoke-test-package.sh
+SPEC_VERSION=1.1.0 scripts/smoke-test-package.sh
 ```
 
 GitHub disables scheduled workflows in a public repository after 60 days without activity; if

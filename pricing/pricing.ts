@@ -27,6 +27,10 @@ const pricing = {
   meals_youth_half: 192,
 
   name_badge: 5,
+
+  // promo codes (promoCodes.ts)
+  first_time_camper_discount: 100,
+  first_time_referrer_meals_discount: 75,
 };
 
 export default pricing;

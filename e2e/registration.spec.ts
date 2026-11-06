@@ -1,6 +1,11 @@
+import type { PromoCode } from '@camphoric/camphoric-event-import-spec';
 import { expect, test, type CamperSection, type RegistrationForm } from '@camphoric/camphoric-event-import-tools/e2e';
+import type { Page } from '@playwright/test';
 
 import event from '../index.ts';
+import promoCodes from '../promoCodes.ts';
+
+const [firstTime, referrer] = promoCodes;
 
 // The registration form, as a registrant fills it in. Every test shares the one
 // imported event (see README.md), so a completed registration stays.
@@ -103,6 +108,54 @@ test('a registration goes through, paying by check', async ({ page, registration
   await registration.expectPaymentStep();
   await registration.payByCheck();
   await expect(page).toHaveURL(/\/register\/finished$/);
+});
+
+// Enters a promo code above "Continue to payment" and applies it
+async function applyPromoCode(page: Page, promo: PromoCode) {
+  await page.getByLabel('Promo code', { exact: true }).fill(promo.code);
+  await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  await expect(page.getByText(`Applied: ${promo.label}`)).toBeVisible();
+}
+
+// From promoCodes.ts: $100 off each camper
+test('the first-time camper code takes $100 off each camper', async ({ page, registration }) => {
+  await camperFor(registration, 'Full camp');
+  const youth = await registration.addCamper();
+  await youth.select('When will you attend?', 'Full camp');
+  await youth.select('Age (at the beginning of camp)', '12-17 years old');
+  await registration.expectTotal(920 + 658);
+  await applyPromoCode(page, firstTime);
+  await registration.expectTotal(920 + 658 - 2 * 100);
+});
+
+test('the first-time camper code takes no more than a camper owes', async ({ page, registration }) => {
+  await camperFor(registration, 'Full camp');
+  const child = await registration.addCamper();
+  await child.select('When will you attend?', 'Full camp');
+  await child.select('Age (at the beginning of camp)', '0-4 years old');
+  await registration.expectTotal(920);
+  await applyPromoCode(page, firstTime);
+  await registration.expectTotal(920 - 100);
+});
+
+// From promoCodes.ts: $75 off the registration's meals, once
+test('the referrer code takes $75 off the meals, once for the registration', async ({ page, registration }) => {
+  const camper = await camperFor(registration, 'Full camp');
+  await camper.select('What meals will you purchase?', 'All Meals');
+  const youth = await registration.addCamper();
+  await youth.select('When will you attend?', 'Full camp');
+  await youth.select('Age (at the beginning of camp)', '12-17 years old');
+  await youth.select('What meals will you purchase?', 'All Meals');
+  await registration.expectTotal(920 + 505 + 658 + 505);
+  await applyPromoCode(page, referrer);
+  await registration.expectTotal(920 + 505 + 658 + 505 - 75);
+});
+
+test('the referrer code takes nothing off without meals', async ({ page, registration }) => {
+  const camper = await camperFor(registration, 'Full camp');
+  await camper.select('What meals will you purchase?', 'No meals');
+  await applyPromoCode(page, referrer);
+  await registration.expectTotal(920);
 });
 
 // Next, the behaviour particular to this camp:

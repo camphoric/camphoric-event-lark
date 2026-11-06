@@ -16,6 +16,7 @@ import registration_schema from './registrationSchema.ts';
 import registration_types from './registrationTypes.ts';
 import registration_ui_schema from './registrationUISchema.ts';
 import lodgings from './lodgings.ts';
+import promo_codes from './promoCodes.ts';
 import reports from './reports.ts';
 import makeRegistrations from './testRegistrations.ts';
 import registration_template_vars from './regTemplateVars.ts';
@@ -67,6 +68,7 @@ const data: EventImport = {
   lodgings,
   reports,
   registration_types,
+  promo_codes,
   custom_charge_types: [
     {
       label: 'New Camper Discount',
