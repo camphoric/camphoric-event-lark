@@ -43,7 +43,7 @@ Last, First, Age, Guardian, Forms, Crew, Lodging, Stay, Park
   {%- set lodging_short = lodging_short | replace('Camp ', 'C') -%}
   {{ camper.attributes.last_name }},
   {{- camper.attributes.first_name }},
-  {{- camper.attributes.age[:camper.attributes.age.find(' ')] | replace('65', '65+') }},
+  {{- (camper.attributes.age or '').split(' ')[0] | replace('65', '65+') }},
   {{- '"' + (camper.admin_attributes.guardian_name if 'guardian_name' in camper.admin_attributes else '') }}",
   {%- if camper.admin_attributes.guardian_forms_required and camper.admin_attributes.guardian_forms_received -%}
     Received
