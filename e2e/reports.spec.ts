@@ -101,8 +101,15 @@ for (const { title } of reports) {
     await page.getByRole('button', { name: title, exact: true }).click();
     const response = await rendered;
     expect(response.status(), `rendering answered ${response.status()}: ${await response.text()}`).toBe(200);
-    const { error } = await response.json() as { error?: string | null };
+    const { error, diagnostics = [] } = await response.json() as {
+      error?: string | null,
+      diagnostics?: { severity: string, message: string, line?: number | null }[],
+    };
     expect(error ?? '', 'the server\'s render error').toBe('');
+    // The server's warnings: a field a Camphoric object doesn't have
+    // (camper.frist_name) renders blank but is flagged here
+    expect(diagnostics.map(d => `line ${d.line ?? '?'}: ${d.severity}: ${d.message}`),
+      'the server\'s render warnings').toEqual([]);
 
     await expect(page.getByRole('heading', { name: title, level: 3 })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Report output' })).toBeVisible();

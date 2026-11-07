@@ -59,8 +59,11 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
 - Every test, on desktop and mobile Chrome, shares the one imported event, so a registration one
   test completes stays.
 - `e2e/reports.spec.ts` signs in to the admin (as the admin the import used) and opens each
-  report in `reports.ts`, failing on any render error. It checks only that a report renders, not
-  what it says, and runs on desktop Chrome only, since reports render on the server.
+  report in `reports.ts`, failing on any render error or server warning (a field a Camphoric
+  object doesn't have). It checks only that a report renders, not what it says, and runs on
+  desktop Chrome only, since reports render on the server. The warnings come only from what the
+  sample registrations reach, and not from pricing results or form answers:
+  `__tests__/reportVariables.test.ts` checks those names against the event instead.
 - The `registration` fixture is a page object for the form (fields by label, campers, lodging, the
   price ticker, submitting and paying). The client's markup lives only there, so a change to the
   Camphoric client changes the harness, not these tests.
