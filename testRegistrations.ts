@@ -21,8 +21,10 @@ import { mealsLookup, ageLookup } from './pricing/camperPricingLogic.ts';
  *
  * Each household is a group of fictional characters from a film, show,
  * book, game or actual-play series (no real people), with made-up ages,
- * addresses and emails. Each lodging area gets at most 60% of its spots,
- * and none go in Camp 1 Tent Area A, which the e2e tests choose.
+ * addresses and emails. Camp 3 Tent Area I is filled on purpose (Jaskier and
+ * the Matrix's crew take all 5 spots), so a full area shows when testing.
+ * Every other area gets at most 60% of its spots, and none go in Camp 1
+ * Tent Area A, which the e2e tests choose.
  *
  * Not here, as the import can't send them: registration types (they need an
  * invitation), promo codes, admin attributes, custom charges, online payment,
@@ -450,16 +452,16 @@ const households: Household[] = [
     ],
   },
   {
-    // The Matrix: the crew of the Nebuchadnezzar, in a Camp 3 tent
+    // The Matrix: the crew of the Nebuchadnezzar, filling Camp 3 Tent Area I with Jaskier
     address: us('101 Zion Way', 'Chicago', 'IL', '60601'),
     email: 'nebuchadnezzar@dontsend.com',
     phone: '+13125550122',
     campers: [
-      { first: 'Morpheus', last: 'of Zion', age: 49, gender: 'Man', meals: F(), lodging: C3_TENT_L, sharedWith: 'Nebuchadnezzar' },
-      { first: 'Thomas', last: 'Anderson', age: 49, gender: 'Man', meals: F(VEGAN), lodging: C3_TENT_L, sharedWith: 'Nebuchadnezzar',
+      { first: 'Morpheus', last: 'of Zion', age: 49, gender: 'Man', meals: F(), lodging: C3_TENT_I, sharedWith: 'Nebuchadnezzar' },
+      { first: 'Thomas', last: 'Anderson', age: 49, gender: 'Man', meals: F(VEGAN), lodging: C3_TENT_I, sharedWith: 'Nebuchadnezzar',
         badge: { name: 'Neo' } },
-      { first: 'Trinity', last: 'of Zion', age: 49, gender: 'Woman', meals: F(), lodging: C3_TENT_L, sharedWith: 'Nebuchadnezzar' },
-      { first: 'Niobe', last: 'of Zion', age: 49, gender: 'Woman', meals: D(), lodging: C3_TENT_L },
+      { first: 'Trinity', last: 'of Zion', age: 49, gender: 'Woman', meals: F(), lodging: C3_TENT_I, sharedWith: 'Nebuchadnezzar' },
+      { first: 'Niobe', last: 'of Zion', age: 49, gender: 'Woman', meals: D(), lodging: C3_TENT_I },
     ],
   },
   {
