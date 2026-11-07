@@ -7,7 +7,7 @@
  * Posts a batch of made-up registrations (1-3 campers each) to the Lark Camp
  * event, through the public register endpoint, so the admin screens and
  * reports have a realistic amount of data to show. It builds on
- * testRegistrations.ts (the handful the importer posts) and varies
+ * testRegistrations.ts (the sample households the importer posts) and varies
  * household make-up, ages, gender, session (full or either half), meal plans
  * that fit the session, lodging (registrar's choice, or a camp, type and
  * area), parking passes that match the lodging, name badges, medical/response
