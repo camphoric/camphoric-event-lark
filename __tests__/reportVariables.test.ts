@@ -10,15 +10,19 @@ import event from '../index.ts';
 // (camphoric/camphoric#994 asks the server to warn on these too).
 //
 // The templates are read as text, not parsed. What's checked:
-// - `x.pricing.name`, `x.pricing['name']`, `(x.pricing or {}).name`
-// - a variable set to a pricing result (`{% set p = camper.pricing %}`, then
+// - `x.pricing.name`, `x.pricing['name']`, `(x.pricing or {}).name`,
+//   `x.pricing.get('name')`, `'name' in x.pricing`, and the same for
+//   `attributes` and `admin_attributes` (the first name only)
+// - a variable set to one of these (`{% set p = camper.pricing %}`, then
 //   `p.name`), anywhere in that template
-// - `x.attributes.name`, `x.admin_attributes.name` (the first name only)
 // - dotted names in filter arguments (`sort(attribute='attributes.last_name')`)
+// Comments are skipped.
 // `x` says whose names they must be: a camper's (`camper`, `c`, …) or a
-// registration's (`registration`, `reg`, `camper.registration`); when it's
+// registration's (`registration`, `reg`, `camper.registration`;
+// `registration.campers[0]` is a camper); when it's
 // something else (a filter argument, `row.data`), either's will do. A name
-// built at render time (`pricing[key]`) isn't checked.
+// built at render time (`pricing[key]`), or reached another way
+// (`namespace(p=camper.pricing)`, `camper['pricing']`), isn't checked.
 
 const settings = event.data.event;
 
@@ -31,7 +35,9 @@ const REGISTRATIONS = new Set(['registration', 'reg']);
 
 // Whose fields `x.pricing` / `x.attributes` are, from the last name in `x`
 function ownerOf(path: string): Owner | 'event' {
-  const last = path.split('.').filter(Boolean).pop() ?? '';
+  const segment = path.split('.').filter(Boolean).pop() ?? '';
+  const last = segment.replace(/\[-?\d+\]$/, '');
+  if (last === 'campers' && segment !== last) return 'camper';
   if (last === 'event') return 'event';
   if (CAMPERS.has(last)) return 'camper';
   if (REGISTRATIONS.has(last)) return 'registration';
@@ -55,8 +61,9 @@ function questionNames(schema: unknown, names = new Set<string>()): Set<string> 
 }
 
 const varsOf = (logic: { var: string }[] | undefined) => (logic ?? []).map(item => item.var);
-// Lines Camphoric adds to pricing results itself
-const SERVER_LINES = ['promo', 'total', 'overridden'];
+// Lines Camphoric adds to pricing results itself (it hides `overridden` and
+// `campers` from templates)
+const SERVER_LINES = ['promo', 'total'];
 const camperPricing = new Set([...varsOf(settings.camper_pricing_logic), ...SERVER_LINES]);
 // A registration's results also sum its campers'
 const registrationPricing = new Set([
@@ -77,45 +84,66 @@ const NAMES: Record<OwnedKind, Record<'camper' | 'registration', Set<string>>> =
 
 // `.name` or `['name']`, but not a method call (`.items()`, `.get(…)`)
 const NAME = String.raw`(?:\.([A-Za-z_]\w*)\b(?!\s*\()|\[\s*['"]([^'"]+)['"]\s*\])`;
-const PATH = String.raw`([A-Za-z_][\w.]*)`;
+// A path, which may index a list (registration.campers[0], [-1])
+const PATH = String.raw`([A-Za-z_](?:[\w.]|\[-?\d+\])*)`;
+const KIND = '(pricing|admin_attributes|attributes)';
+// `x.pricing`, `(x.pricing or {})`
+const DICT = String.raw`${PATH}\.${KIND}(?:\s+or\s+\{\}\s*\))?`;
 
-function uses(template: string): Use[] {
+// Whose names `x.<kind>` holds
+function kindOf(kind: OwnedKind, path: string): [Kind, Owner] {
+  const owner = ownerOf(path);
+  if (owner !== 'event') return [kind, owner];
+  return kind === 'pricing' ? ['event pricing', 'either'] : [kind, 'either'];
+}
+
+function uses(raw: string): Use[] {
+  // Comments can name a field that's gone ({# was camper.pricing.old #})
+  const template = raw.replace(/\{#[\s\S]*?#\}/g, '');
   const found: Use[] = [];
-  const add = (kind: Kind, owner: Owner, match: RegExpMatchArray, at: number) => {
-    const name = match[at] ?? match[at + 1];
+  const push = ([kind, owner]: [Kind, Owner], name: string | undefined) => {
     if (name) found.push({ kind, owner, name });
   };
-  const pricingKind = (owner: Owner | 'event'): [Kind, Owner] =>
-    owner === 'event' ? ['event pricing', 'either'] : ['pricing', owner];
+  // Where `dict` (a path, or an alias) is a dict of `kind`: `.name`,
+  // `['name']`, `.get('name')` and `'name' in …`
+  const readsOf = (dict: string, kindOwner: [Kind, Owner]) => {
+    for (const match of template.matchAll(new RegExp(`${dict}${NAME}`, 'g'))) {
+      push(kindOwner, match[match.length - 2] ?? match[match.length - 1]);
+    }
+    for (const match of template.matchAll(new RegExp(String.raw`${dict}\.get\(\s*['"]([^'"]+)['"]`, 'g'))) {
+      push(kindOwner, match[match.length - 1]);
+    }
+  };
 
-  for (const match of template.matchAll(new RegExp(String.raw`${PATH}\.pricing${NAME}`, 'g'))) {
-    add(...pricingKind(ownerOf(match[1])), match, 2);
+  for (const match of template.matchAll(new RegExp(String.raw`${DICT}${NAME}`, 'g'))) {
+    push(kindOf(match[2] as OwnedKind, match[1]), match[3] ?? match[4]);
   }
-  for (const match of template.matchAll(new RegExp(String.raw`${PATH}\.pricing\s+or\s+\{\}\s*\)${NAME}`, 'g'))) {
-    add(...pricingKind(ownerOf(match[1])), match, 2);
+  for (const match of template.matchAll(new RegExp(String.raw`${DICT}\.get\(\s*['"]([^'"]+)['"]`, 'g'))) {
+    push(kindOf(match[2] as OwnedKind, match[1]), match[3]);
+  }
+  for (const match of template.matchAll(new RegExp(String.raw`['"](\w+)['"]\s+(?:not\s+)?in\s+\(?\s*${PATH}\.${KIND}\b(?!\s*(?:or\s+\{\}\s*\)\s*)?[.\[])`, 'g'))) {
+    push(kindOf(match[3] as OwnedKind, match[2]), match[1]);
   }
   // event.pricing['meals_adult_' ~ size]: some event pricing name starts so
   for (const match of template.matchAll(/\bevent\.pricing\[\s*['"](\w+)['"]\s*~/g)) {
-    found.push({ kind: 'event pricing prefix', owner: 'either', name: match[1] });
+    push(['event pricing prefix', 'either'], match[1]);
   }
-  // {% set p = camper.pricing %}, `… or {}`, `… | default({})`
+  // {% set p = camper.pricing %}, `… or {}`, `… | default({})`: p's names,
+  // anywhere in the template (so don't reuse the name for something else)
   const aliases = template.matchAll(new RegExp(
-    String.raw`\bset\s+(\w+)\s*=\s*\(?\s*${PATH}\.pricing\s*(?:or\s*\{\}\s*\)?|\|\s*default\(\s*\{\}\s*\))?\s*-?%`, 'g'));
-  for (const [, alias, path] of aliases) {
-    const [kind, owner] = pricingKind(ownerOf(path));
-    for (const match of template.matchAll(new RegExp(String.raw`(?<![\w.])${alias}${NAME}`, 'g'))) {
-      add(kind, owner, match, 1);
+    String.raw`\bset\s+(\w+)\s*=\s*\(?\s*${PATH}\.${KIND}\s*(?:or\s*\{\}\s*\)?|\|\s*default\(\s*\{\}\s*\))?\s*-?%`, 'g'));
+  for (const [, alias, path, kind] of aliases) {
+    const kindOwner = kindOf(kind as OwnedKind, path);
+    readsOf(String.raw`(?<![\w.])${alias}`, kindOwner);
+    for (const match of template.matchAll(new RegExp(String.raw`['"](\w+)['"]\s+(?:not\s+)?in\s+${alias}\b(?!\s*[.\[])`, 'g'))) {
+      push(kindOwner, match[1]);
     }
-  }
-  for (const match of template.matchAll(new RegExp(String.raw`${PATH}\.(admin_attributes|attributes)${NAME}`, 'g'))) {
-    const owner = ownerOf(match[1]);
-    add(match[2] as Kind, owner === 'event' ? 'either' : owner, match, 3);
   }
   // Filter arguments: sort(attribute='attributes.last_name,…'), sum(attribute='pricing.meals')
   for (const [, argument] of template.matchAll(/['"]([\w.,\s]+)['"]/g)) {
     for (const path of argument.split(',').map(part => part.trim())) {
-      const match = /^(?:[\w.]*\.)?(pricing|attributes|admin_attributes)\.(\w+)/.exec(path);
-      if (match) found.push({ kind: match[1] as Kind, owner: 'either', name: match[2] });
+      const match = /^(?:([\w.]*)\.)?(pricing|attributes|admin_attributes)\.(\w+)/.exec(path);
+      if (match) push(kindOf(match[2] as OwnedKind, match[1] ?? ''), match[3]);
     }
   }
   return found;
@@ -173,6 +201,31 @@ describe('report templates', () => {
     expect(unknownIn('{% set p = camper.pricing | default({}) %}{{ p.badge }}')).toHaveLength(1);
     expect(unknownIn('{% set ep = event.pricing %}{{ ep.full_adult }}')).toHaveLength(0);
     expect(uses('{% for k, v in camper.pricing.items() %}{% endfor %}')).toEqual([]);
+    expect(unknownIn('{{ campers | sum(attribute="event.pricing.full_adult") }}')).toHaveLength(0);
+  });
+
+  it('check `in`, `.get()`, `or {}`, list indexes, and aliases of any kind', () => {
+    expect(unknownIn('{% if \'promos\' in camper.pricing %}{% endif %}')).toHaveLength(1);
+    expect(unknownIn('{% if \'promo\' in camper.pricing %}{% endif %}')).toHaveLength(0);
+    expect(unknownIn('{% if \'guardian_nam\' in camper.admin_attributes %}{% endif %}')).toHaveLength(1);
+    expect(unknownIn('{{ camper.attributes.get(\'phon\') }}')).toHaveLength(1);
+    expect(unknownIn('{{ (camper.attributes or {}).phon }}')).toHaveLength(1);
+    expect(unknownIn('{{ registration.campers[0].pricing.mealz }}')).toHaveLength(1);
+    expect(unknownIn('{% set a = camper.attributes %}{{ a.phon }}')).toHaveLength(1);
+    expect(unknownIn('{{ registration.campers[-1].pricing.mealz }}')).toHaveLength(1);
+    // `in` a value inside a field isn't a field name
+    expect(uses('{% if \'Medical\' in camper.attributes.good_samaritan.skills %}{% endif %}')
+      .filter(use => use.name === 'Medical')).toEqual([]);
+    expect(uses('{% if \'Medical\' in (camper.attributes or {}).good_samaritan %}{% endif %}')
+      .filter(use => use.name === 'Medical')).toEqual([]);
+    expect(uses('{% set a = camper.attributes %}{% if \'Medical\' in a.good_samaritan.skills %}{% endif %}')
+      .filter(use => use.name === 'Medical')).toEqual([]);
+  });
+
+  it('skip comments and hidden pricing lines', () => {
+    expect(uses('{# was camper.pricing.oldname #}')).toEqual([]);
+    // Camphoric hides `overridden` from templates
+    expect(unknownIn('{{ camper.pricing.overridden }}')).toHaveLength(1);
   });
 
   it('list only reports this event has as known to be missing names', () => {
