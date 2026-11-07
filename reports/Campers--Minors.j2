@@ -12,13 +12,16 @@ first, last, crew, age, need_forms, got_forms, lodging, registered_with, email
     | replace('RV→', '')
     | replace('Cooks Cabin', 'Cook')
     | replace('Cabin ', 'Cbn') -%}
-{{ camper.attributes.first_name }},
-{{- camper.attributes.last_name }},
+{{ camper.attributes.first_name | csv }},
+{{- camper.attributes.last_name | csv }},
 {{- crew or 'none' }},
 {{- camper.attributes.age }},
 {{- 'Yes' if camper.admin_attributes.guardian_forms_required else 'No' }},
 {{- 'Yes' if camper.admin_attributes.guardian_forms_received else 'No' }},
-{{- lodging_short }}, "{%- for c in camper.registration.campers -%}
-{{- c.attributes.first_name }} {{ (c.attributes.last_name or '') ~ ';' -}}{%- endfor -%}",
+{%- set registered_with = [] -%}
+{%- for c in camper.registration.campers -%}
+  {%- do registered_with.append((c.attributes.first_name or '') ~ ' ' ~ (c.attributes.last_name or '') ~ ';') -%}
+{%- endfor -%}
+{{- lodging_short }},{{ registered_with | join('') | csv }},
 {{- camper.registration.registrant_email  }}
 {% endfor -%}

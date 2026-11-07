@@ -14,19 +14,19 @@ last, first, crew, diff, zip, state, city, address, country, camp, session, arri
 {% for row in rows | sort(attribute="zip_code") -%}
     {%- set camper = row.camper -%}
     {%- set crew = camper.registration.registration_type.name if camper.registration.registration_type -%}
-	{{  '"' ~ (camper.attributes.first_name or '') }}",
-  {{- '"' ~ (camper.attributes.last_name or '') }}",
-  {{- '"' ~ (crew or 'camper') }}",
-  {{- '"' ~ (camper.attributes.address_different_than_payer | string) }}",
-	{{- '"' ~ (row.address.zip_code or '') }}",
-	{{- '"' ~ (row.address.state_or_province or '') }}",
-	{{- '"' ~ (row.address.city or '') }}",
-	{{- '"' ~ (row.address.street_address or '') }}",
-	{{- '"' ~ (row.address.country or '') }}",
-  {{- '"' ~ row.camp }}",
-  {{- '"' ~ (camper.attributes.session or '') }}",
-	{{- '"' ~ ( camper.stay[0] if camper.stay else '??' ) }}",
-  {{- '"' ~ (camper.attributes.email or camper.registration.registrant_email or '-')}}",
+	{{  (camper.attributes.first_name or '') | csv }},
+  {{- (camper.attributes.last_name or '') | csv }},
+  {{- (crew or 'camper') | csv }},
+  {{- (camper.attributes.address_different_than_payer | string) | csv }},
+	{{- (row.address.zip_code or '') | csv }},
+	{{- (row.address.state_or_province or '') | csv }},
+	{{- (row.address.city or '') | csv }},
+	{{- (row.address.street_address or '') | csv }},
+	{{- (row.address.country or '') | csv }},
+  {{- row.camp | csv }},
+  {{- (camper.attributes.session or '') | csv }},
+	{{- ( camper.stay[0] if camper.stay else '??' ) | csv }},
+  {{- (camper.attributes.email or camper.registration.registrant_email or '-') | csv }},
   {#- TODO: `attributes.phone` isn't a Lark camper field, so this always falls back to the payer's number. #}
-  {{- '"' ~ (camper.attributes.phone or (camper.registration.attributes.payment or {}).payer_number or '-')}}"
+  {{- (camper.attributes.phone or (camper.registration.attributes.payment or {}).payer_number or '-') | csv }}
 {% endfor -%}

@@ -37,8 +37,8 @@ last, first, crew, lodging, park, email, parking, tent tag, session, row
   {%- if 'Tent' in full_lodging_path -%}
     {%- set tent_tag_holder = camper.lodging.campers | selectattr('attributes.session', '==', camper.attributes.session) | sort(attribute="index,attributes.last_name,attributes.first_name") | first -%}
   {%- endif -%}
-  {{ camper.attributes.last_name }},
-  {{- camper.attributes.first_name }},
+  {{ camper.attributes.last_name | csv }},
+  {{- camper.attributes.first_name | csv }},
   {{- crew or 'Camper' }},
   {{- lodging_short}},
   {{- parking_short[parking] or '-'}},
@@ -51,14 +51,14 @@ last, first, crew, lodging, park, email, parking, tent tag, session, row
   {%- elif (parking_passes | length) > 1 -%}
     {{- parking_passes | length }} parking passes
   {%- elif pass_holder -%}
-    under {{ pass_holder.attributes.first_name }} {{ pass_holder.attributes.last_name }}
+    {{ ('under ' ~ (pass_holder.attributes.first_name or '') ~ ' ' ~ (pass_holder.attributes.last_name or '')) | csv }}
   {%- else -%}
     NONE
   {%- endif -%},
   {%- if 'Tent' in full_lodging_path and tent_tag_holder.id == camper.id -%}
     tent tag {{ full_lodging_path[full_lodging_path.find('→Spot '):] | replace('→Spot ', '') }}
   {%- elif 'Tent' in full_lodging_path -%}
-    under {{ tent_tag_holder.attributes.first_name }} {{ tent_tag_holder.attributes.last_name }}
+    {{ ('under ' ~ (tent_tag_holder.attributes.first_name or '') ~ ' ' ~ (tent_tag_holder.attributes.last_name or '')) | csv }}
   {%- else -%}
     NONE
   {%- endif -%},

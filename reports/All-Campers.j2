@@ -43,7 +43,7 @@ last,first,age,crew,camp,lodging,email,phone,parking,tenttag,session,arrived,id
   {{- crew or 'Camper' }},
   {{- camp }},
   {{- lodging_short}},
-  {{- camper.attributes.email or camper.registration.registrant_email or '-'}},\
+  {{- camper.attributes.email or camper.registration.registrant_email or '-'}},
   {{- (camper.registration.attributes.payment or {}).payer_number or '-'}},
 	{{- '"' ~ parking.text -}}",
   {%- if not lodging_set -%}
@@ -51,7 +51,7 @@ last,first,age,crew,camp,lodging,email,phone,parking,tenttag,session,arrived,id
   {%- elif 'Tent' in full_path and tent_tag_holder.id == camper.id -%}
     {{ full_path[full_path.find('→Spot '):] | replace('→Spot ', '') }}
   {%- elif 'Tent' in full_path and tent_tag_holder.attributes.first_name -%}
-    under {{ tent_tag_holder.attributes.first_name }} {{ tent_tag_holder.attributes.last_name }}
+    {{ ('under ' ~ (tent_tag_holder.attributes.first_name or '') ~ ' ' ~ (tent_tag_holder.attributes.last_name or '')) | csv }}
   {%- else -%}
     NONE
   {%- endif -%},
