@@ -11,8 +11,8 @@ full_name,first_name,id,email,guardian_forms_required,guardian_forms_received,re
 	{%- if full_lodging_path.startswith('Camp 3') -%}{%- set breakfast_in = 'Camp 2' -%}{%- endif -%}
   {%- set dinner_in = camper.admin_attributes.meal_assignment_dinner or dinner_in -%}
   {%- set breakfast_in = camper.admin_attributes.meal_assignment_breakfast or breakfast_in -%}
-  {{camper.attributes.first_name }} {{ camper.attributes.last_name }},
-  {{- camper.attributes.first_name }},
+  {{ ((camper.attributes.first_name or '') ~ ' ' ~ (camper.attributes.last_name or '')) | csv }},
+  {{- camper.attributes.first_name | csv }},
   {{- camper.id }},
   {{- camper.attributes.email or camper.registration.registrant_email or '-'}},
   {{- "" if not camper.admin_attributes.guardian_forms_required else "Yes" }},

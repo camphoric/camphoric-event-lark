@@ -9,9 +9,11 @@ campers,session,camp,tag
 {%- if (spot.campers | selectattr('attributes.session', '==', session) | list | length) < 1 -%}
   {%- continue -%}
 {%- endif -%}
-"{%- for camper in spot.campers | sort(attribute="index,attributes.last_name,attributes.first_name") if camper.attributes.session == session -%}
-    {{- camper.attributes.first_name }} {{	camper.attributes.last_name }}{{- ',' if not loop.last else '' -}}
-{%- endfor -%}",
+{%- set names = [] -%}
+{%- for camper in spot.campers | sort(attribute="index,attributes.last_name,attributes.first_name") if camper.attributes.session == session -%}
+  {%- do names.append((camper.attributes.first_name or '') ~ ' ' ~ (camper.attributes.last_name or '')) -%}
+{%- endfor -%}
+{{ names | join(',') | csv }},
   {{- session_short[session] }},
   {{- spot.path_names[0] -}},
   {{- spot.path_names[-1].removeprefix('Spot ') }}{%- if '1st' in session -%}A{%- elif '2nd' in session -%}B{%- else -%}{%- endif %}

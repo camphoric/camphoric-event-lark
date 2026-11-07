@@ -3,10 +3,61 @@ import { request, type BrowserContextOptions, type Page } from '@playwright/test
 
 import reports from '../reports.ts';
 
-// Every report opens in the admin and renders without an error. Only that:
-// what a report says is for its own tests (__tests__/). The reports render on
-// the server (Jinja), so a broken template shows as the page's "Render error",
-// or as the render request failing; a broken page as a page or console error.
+// Every report opens in the admin and renders without an error, and a CSV
+// report is well-formed CSV. Only that: what a report says is for its own
+// tests (__tests__/). The reports render on the server (Jinja), so a broken
+// template shows as the page's "Render error", or as the render request
+// failing; a broken page as a page or console error.
+
+// A CSV's rows (RFC 4180: a quoted field may hold commas, doubled quotes and
+// line breaks), or what's wrong with it
+function csvRows(text: string): string[][] | string {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let quoted = false;
+  let fieldStart = true;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (ch === '"') {
+        quoted = false;
+        const next = text[i + 1];
+        if (next !== undefined && next !== ',' && next !== '\n' && next !== '\r') {
+          return `row ${rows.length + 1}: text after a closing quote (${JSON.stringify(text.slice(Math.max(0, i - 20), i + 20))})`;
+        }
+      } else field += ch;
+    } else if (ch === '"' && fieldStart) { quoted = true; fieldStart = false; }
+    else if (ch === '"') {
+      return `row ${rows.length + 1}: a quote inside an unquoted field (${JSON.stringify(text.slice(Math.max(0, i - 20), i + 20))})`;
+    } else if (ch === ',') { row.push(field); field = ''; fieldStart = true; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(field); rows.push(row); row = []; field = ''; fieldStart = true;
+    } else { field += ch; fieldStart = false; }
+  }
+  if (quoted) return `row ${rows.length + 1}: a quoted field that never closes`;
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// What's wrong with a CSV report: bad quoting, or a row whose number of
+// fields isn't the header's (a field with an unquoted comma). Blank lines are
+// allowed (some reports separate their tables with them).
+function csvProblems(text: string): string[] {
+  const rows = csvRows(text);
+  if (typeof rows === 'string') return [rows];
+  const lines = rows.map((fields, index) => ({ fields, line: index + 1 }))
+    .filter(({ fields }) => fields.some(field => field.trim()));
+  const [header] = lines;
+  if (!header) return [];
+  return lines
+    .filter(({ fields }) => fields.length !== header.fields.length)
+    .slice(0, 5)
+    .map(({ fields, line }) =>
+      `row ${line} has ${fields.length} fields, the header ${header.fields.length}: ${JSON.stringify(fields.join(','))}`);
+}
 
 type StorageState = Exclude<BrowserContextOptions['storageState'], string | undefined>;
 
@@ -93,7 +144,7 @@ async function openReports(page: Page, organizationId: number, eventId: number) 
   await expect(page.getByRole('heading', { name: 'Reports', level: 2 })).toBeVisible();
 }
 
-for (const { title } of reports) {
+for (const { title, output } of reports) {
   test(`the report "${title}" renders`, async ({ page, eventId, adminSession, problems }) => {
     await openReports(page, adminSession.organizationId, eventId);
 
@@ -101,7 +152,8 @@ for (const { title } of reports) {
     await page.getByRole('button', { name: title, exact: true }).click();
     const response = await rendered;
     expect(response.status(), `rendering answered ${response.status()}: ${await response.text()}`).toBe(200);
-    const { error, diagnostics = [] } = await response.json() as {
+    const { report, error, diagnostics = [] } = await response.json() as {
+      report?: string,
       error?: string | null,
       diagnostics?: { severity: string, message: string, line?: number | null }[],
     };
@@ -110,6 +162,7 @@ for (const { title } of reports) {
     // (camper.frist_name) renders blank but is flagged here
     expect(diagnostics.map(d => `line ${d.line ?? '?'}: ${d.severity}: ${d.message}`),
       'the server\'s render warnings').toEqual([]);
+    if (output === 'csv') expect(csvProblems(report ?? ''), 'the CSV\'s shape').toEqual([]);
 
     await expect(page.getByRole('heading', { name: title, level: 3 })).toBeVisible();
     await expect(page.getByRole('region', { name: 'Report output' })).toBeVisible();

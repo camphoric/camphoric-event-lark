@@ -25,7 +25,7 @@ First, Last, Type, Session, Lodging, Meals, Arrived
   {%- set lodging_short = lodging_short[:lodging_short.find('→Spot')] if '→Spot' in lodging_short else lodging_short -%}
 {%- endif -%}
 {%- set meals = camper.attributes.meals or {} -%}
-  {{camper.attributes.first_name}}, {{camper.attributes.last_name}}, {{ crew | replace('crew-kitchen-', '') }},
+  {{ camper.attributes.first_name | csv }},{{ camper.attributes.last_name | csv }},{{ crew | replace('crew-kitchen-', '') }},
   {{- session_short[camper.attributes.session] }},
   {{- lodging_short if ldg else 'Not assigned' }},
   {{- meals.meal_plan }}: {{- meals.meal_type }},

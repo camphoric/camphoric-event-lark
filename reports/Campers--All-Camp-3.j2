@@ -38,8 +38,8 @@
 {%- endfor -%}
 first, last, crew, lodging, arrival_date, park, email
 {% for row in rows | sort(attribute="camp") | sort(attribute="camper.attributes.last_name") if row.camp in camps -%}
-{{ row.camper.attributes.first_name }},
-{{- row.camper.attributes.last_name }},
+{{ row.camper.attributes.first_name | csv }},
+{{- row.camper.attributes.last_name | csv }},
 {{- row.crew or 'none' }},
 {{- row.lodging_short}},
 {{- row.camper.stay[0] }},

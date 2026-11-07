@@ -29,10 +29,10 @@ camper,badge_title,badge_name,badge_gender,camp,arrive_thurs,amt,reg_date
   {%- set camp = camper.lodging.path_names[0] if camper.lodging -%}
   {%- set badge_title = 'Reg Volunteer' if camper.admin_attributes.registration_volunteer else '' -%}
 	{%- set badge_title = (camper.admin_attributes.badge_role or type_display[crew] or badge_title) -%}
-	{{- '"' ~ (camper.attributes.first_name or '') }} {{ camper.attributes.last_name }}",
-	{{- '"' ~ badge_title ~ '"'}},
-  {{- '"' ~ (camper.attributes.name_badge.name or '') }}",
-  {{- '"' ~ (camper.attributes.name_badge.pronouns if camper.attributes.name_badge.pronouns else '') ~ '"' }},
+	{{- ((camper.attributes.first_name or '') ~ ' ' ~ (camper.attributes.last_name or '')) | csv }},
+	{{- badge_title | csv }},
+  {{- (camper.attributes.name_badge.name or '') | csv }},
+  {{- (camper.attributes.name_badge.pronouns or '') | csv }},
   {{- camp }},
   {{- "yes" if camper.stay and camper.stay[0] == early_day else "" }},
   {{- camper.pricing.name_badge or 0 }},

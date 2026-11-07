@@ -40,23 +40,25 @@ Last, First, Age, Guardian, GForms, Crew, Title, Lodging, Stay, Park, VLicense, 
     {%- if 'Camp 3' in full_lodging_path and 'RV' in full_lodging_path -%}{%- set parking = 'Vehicle Camp 3' -%}{%- endif -%}
   {%- endif -%}
   {%- set lodging_short = lodging_short | replace('Camp ', 'C') -%}
-  {{ '"' + camper.attributes.last_name }}",
-  {{- '"' + camper.attributes.first_name }}",
+  {{ camper.attributes.last_name | csv }},
+  {{- camper.attributes.first_name | csv }},
   {{- (camper.attributes.age or '').split(' ')[0] | replace('65', '65+') }},
-  {{- '"' + (camper.admin_attributes.guardian_name if 'guardian_name' in camper.admin_attributes else '') }}",
+  {{- (camper.admin_attributes.guardian_name if 'guardian_name' in camper.admin_attributes else '') | csv }},
   {{- 'Yes' if camper.admin_attributes.guardian_forms_required else '' }},
   {{- (crew | replace('crew-', '') | replace('-partial', '') | replace('-full', '')) or '-' }},
-  {{- '"' + (camper.admin_attributes.crew_exception if 'crew_exception' in camper.admin_attributes else '' )}}",
+  {{- (camper.admin_attributes.crew_exception if 'crew_exception' in camper.admin_attributes else '') | csv }},
   {{- lodging_short }},
   {{- session_short[camper.attributes.session] }},
   {{- ((parking_passes | length | string) + 'x' + parking_short[parking]) if parking_passes else '-' }},
   {%- if camper.admin_attributes.vehicles -%}
-    {{- '"' + (camper.admin_attributes.vehicles | map(attribute="license", default="-") | join('\n')) -}}",
-    {{- '"' + (camper.admin_attributes.vehicles | map(attribute="state", default="-") | join('\n')) -}}",
-    {{- '"' -}}{%- for v in camper.admin_attributes.vehicles -%}
-      {{- v.year }} {{ v.color }} {{ v.make }} {{ v.model }}{{ '' if loop.last else '\n' }}
-    {%- endfor -%}",
-    {{- '"' + (camper.admin_attributes.vehicles | map(attribute="passengers") | map('join', ',') | join('\n')) -}}"
+    {{- (camper.admin_attributes.vehicles | map(attribute="license", default="-") | join('\n')) | csv -}},
+    {{- (camper.admin_attributes.vehicles | map(attribute="state", default="-") | join('\n')) | csv -}},
+    {%- set descriptions = [] -%}
+    {%- for v in camper.admin_attributes.vehicles -%}
+      {%- do descriptions.append(v.year ~ ' ' ~ v.color ~ ' ' ~ v.make ~ ' ' ~ v.model) -%}
+    {%- endfor -%}
+    {{- descriptions | join('\n') | csv -}},
+    {{- (camper.admin_attributes.vehicles | map(attribute="passengers") | map('join', ',') | join('\n')) | csv -}}
   {%- else -%}
     -, -, -, -
   {%- endif -%},

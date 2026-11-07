@@ -37,5 +37,5 @@ first, last, crew, lodging, park, email
       {%- endfor -%}
       {%- set parking.text = parking.text ~ ')' if camper.id != last_camper.id else parking.text -%}
     {%- endif -%}
-    {{ camper.attributes.first_name }}, {{ camper.attributes.last_name }}, {{ crew or 'camper' }}, {{lodging_short}},"{{parking.text}}", {{ camper.registration.registrant_email }}
+    {{ camper.attributes.first_name | csv }},{{ camper.attributes.last_name | csv }},{{ crew or 'camper' }},{{lodging_short}},"{{parking.text}}",{{ camper.registration.registrant_email }}
 {% endfor -%}

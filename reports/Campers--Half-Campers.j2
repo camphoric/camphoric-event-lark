@@ -31,8 +31,8 @@ first, last, crew, lodging, park, email, session, days, parking passes, parking 
         {%- set parking = 'Vehicle Camp 2' if 'Camp 2' in full_path and 'RV' in full_path else parking -%}
         {%- set parking = 'Vehicle Camp 3' if 'Camp 3' in full_path and 'RV' in full_path else parking -%}
     {%- endif -%}
-  {{ camper.attributes.first_name }},
-  {{- camper.attributes.last_name }},
+  {{ camper.attributes.first_name | csv }},
+  {{- camper.attributes.last_name | csv }},
   {{- crew or 'camper' }},
   {{- lodging_short}},
   {{- parking_short[parking] or '-'}},
@@ -45,5 +45,5 @@ first, last, crew, lodging, park, email, session, days, parking passes, parking 
   {%- set pass_holder = camper if passes else (camper.registration.campers | selectattr('attributes.parking_passes') | first) -%}
   {%- set pass_holder = pass_holder or camper.registration.campers[0] -%}
   {{- passes | length }},
-  {{- '"' ~ (pass_holder.attributes.last_name or '') }}, {{- pass_holder.attributes.first_name }}"
+  {{- ((pass_holder.attributes.last_name or '') ~ ',' ~ (pass_holder.attributes.first_name or '')) | csv }}
 {% endfor -%}

@@ -40,10 +40,10 @@ Last, First, Age, Guardian, Forms, Crew, Lodging, Stay, Park
     {%- if 'Camp 3' in full_lodging_path and 'RV' in full_lodging_path -%}{%- set parking = 'Vehicle Camp 3' -%}{%- endif -%}
   {%- endif -%}
   {%- set lodging_short = lodging_short | replace('Camp ', 'C') -%}
-  {{ camper.attributes.last_name }},
-  {{- camper.attributes.first_name }},
+  {{ camper.attributes.last_name | csv }},
+  {{- camper.attributes.first_name | csv }},
   {{- (camper.attributes.age or '').split(' ')[0] | replace('65', '65+') }},
-  {{- '"' + (camper.admin_attributes.guardian_name if 'guardian_name' in camper.admin_attributes else '') }}",
+  {{- (camper.admin_attributes.guardian_name if 'guardian_name' in camper.admin_attributes else '') | csv }},
   {%- if camper.admin_attributes.guardian_forms_required and camper.admin_attributes.guardian_forms_received -%}
     Received
   {%- elif camper.admin_attributes.guardian_forms_required and not camper.admin_attributes.guardian_forms_received -%}

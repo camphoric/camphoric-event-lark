@@ -84,8 +84,8 @@ last,first,lodging,registration_type,parking_type,stay,balance_due,meal_plan,mea
 {% for row in rows | sort(attribute="full_path") if row.crew_key in crewLeadLookup.keys() -%}
     {%- set camper = row.camper -%}
     {%- set lead = crewLeadLookup[row.crew_key][row.camp] if row.crew and row.camp -%}
-    {{- camper.attributes.last_name }},
-    {{- camper.attributes.first_name }},
+    {{- camper.attributes.last_name | csv }},
+    {{- camper.attributes.first_name | csv }},
     {{- row.full_path}},
     {{- row.crew or 'none' }},
     {{- parking_short[row.parking] or '-'}},
