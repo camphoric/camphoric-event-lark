@@ -140,8 +140,8 @@ test('the name badge section warns that joke pronouns will be removed', async ({
   await expect(camper.message('Non-serious entries will be removed')).toBeVisible();
 });
 
-// B5: sheet row "Donation should be integer only". (-1 and 1.1 are rejected
-// with their message: validation.spec.ts, H1.)
+// B5: sheet row "Donation should be integer only". (A minus sign and a
+// decimal point can't be typed either: validation.spec.ts, H1.)
 test('a donation can\'t be typed with letters, and adds its dollars', async ({ registration }) => {
   await camperFor(registration, 'Full camp');
   const donation = registration.field(DONATION);
@@ -152,13 +152,14 @@ test('a donation can\'t be typed with letters, and adds its dollars', async ({ r
 });
 
 // B6: after a rejected donation, testers saw Meals reset to All Meals and the
-// total change
+// total change. (Since Camphoric v0.18.0 a donation can't be typed as anything
+// the form rejects, so pronouns over the limit are what's rejected here.)
 test('a rejected submission keeps every answer', async ({ page, registration }) => {
   const camper = await fillRequired(registration);
-  await buyBadge(camper);
+  await buyBadge(camper, 'x'.repeat(16));
   await parkingPasses(camper).add();
-  await registration.fill(DONATION, '3.5');
-  const total = pricing.full_adult + pricing.name_badge + pricing.camper_parking_pass + 3.5;
+  await registration.fill(DONATION, '3');
+  const total = pricing.full_adult + pricing.name_badge + pricing.camper_parking_pass + 3;
   await registration.expectTotal(total);
 
   await expectRejected(page, registration);
@@ -166,6 +167,6 @@ test('a rejected submission keeps every answer', async ({ page, registration }) 
   await expect(camper.field(BADGE)).toHaveValue('Yes');
   await expect(camper.field(SESSION)).toHaveValue('Full camp');
   await expect(parkingPasses(camper).items()).toHaveCount(1);
-  await expect(registration.field(DONATION)).toHaveValue('$3.5');
+  await expect(registration.field(DONATION)).toHaveValue('$3');
   await registration.expectTotal(total);
 });
