@@ -1,0 +1,37 @@
+{#- Every payment and refund, one row each, to reconcile against the bank and
+    PayPal as they come in: by date paid, oldest first, then in the order they
+    were recorded; ones with no date paid come last. (Camphoric lists
+    `payments` registration by registration, so they're sorted here.) A
+    refund's amount is negative, and Refund Of is the ID of the payment it
+    gives money back from. PayPal ID is PayPal's transaction id: a payment's
+    capture (its `paypal_response` is the whole PayPal order), a refund's own
+    id. Payer is the billing name the registration gave. -#}
+{%- set dated = payments | selectattr('paid_on') | sort(attribute='id') | sort(attribute='paid_on') | list -%}
+{%- set undated = payments | rejectattr('paid_on') | sort(attribute='id') | list -%}
+ID,Paid On,Recorded,Kind,Method,Amount,Registration,Payer,Registrant Email,Invoice,Refund Of,PayPal ID,Notes
+{% for payment in dated + undated -%}
+{%- set reg = payment.registration -%}
+{%- set billing = (reg.attributes.payment or {}) if reg else {} -%}
+{%- set invoice = payment.invoice -%}
+{%- set paypal = payment.paypal_response or {} -%}
+{%- if payment.is_refund -%}
+    {%- set paypal_id = paypal.id or '' -%}
+{%- else -%}
+    {%- set unit = (paypal.purchase_units or []) | first or {} -%}
+    {%- set capture = ((unit.payments or {}).captures or []) | first or {} -%}
+    {%- set paypal_id = capture.id or '' -%}
+{%- endif -%}
+{{ payment.id }},
+{{- payment.paid_on | date }},
+{{- payment.created_at | datetime }},
+{{- 'Refund' if payment.is_refund else 'Payment' }},
+{{- (payment.payment_type or '') | csv }},
+{{- payment.amount | money | csv }},
+{{- reg.id if reg else '' }},
+{{- ((billing.payer_first_name or '') ~ ' ' ~ (billing.payer_last_name or '')) | trim | csv }},
+{{- ((reg.registrant_email if reg else '') or '') | csv }},
+{{- (('#' ~ invoice.id ~ ((' ' ~ invoice.description) if invoice.description else '')) if invoice else '') | csv }},
+{{- payment.refund_of.id if payment.refund_of else '' }},
+{{- paypal_id | csv }},
+{{- (payment.notes or '') | csv }}
+{% endfor -%}
