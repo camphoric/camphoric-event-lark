@@ -69,12 +69,14 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
 - Every test, on desktop and mobile Chrome, shares the one imported event, so a registration one
   test completes stays.
 - `e2e/reports.spec.ts` signs in to the admin (as the throwaway server's admin, from the
-  harness's `adminCredentials()`) and opens each report in `reports.ts`, failing on any render error or server warning (a field a Camphoric
-  object doesn't have), and fails a CSV report whose quoting is broken or whose rows don't have
-  the header's number of fields (an unquoted comma). It doesn't check what a report says, and runs
-  on desktop Chrome only, since reports render on the server. The warnings come only from what the
-  sample registrations reach, and not from pricing results or form answers:
-  `__tests__/reportVariables.test.ts` checks those names against the event instead.
+  harness's `adminCredentials()`) and opens each report in `reports.ts`. It fails on any render
+  error, and on any server warning (a field the event or a Camphoric object doesn't have) but the
+  known ones its `knownWarnings` lists, each tracked by an issue. It also fails a CSV report whose
+  quoting is broken or whose rows don't have the header's number of fields (an unquoted comma). It
+  doesn't check what a report says, and runs on desktop Chrome only, since reports render on the
+  server. A warning comes only from a line some registration reaches, and every test shares the
+  one event, so which show depends on what the tests have registered:
+  `__tests__/reportVariables.test.ts` checks every name a template reads against the event instead.
 - The fixtures: `registration`, a page object for the form (fields by label, campers and their
   lists, lodging, the price ticker, the payment step); `admin`, for invitations and the email the
   server sent; and `payPal`, the orders sent to the fake PayPal. The client's markup lives only
