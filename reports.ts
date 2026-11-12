@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import type { Report as SpecReport } from '@camphoric/camphoric-event-import-spec';
+import type { Report } from '@camphoric/camphoric-event-import-spec';
 
 import { packagePath } from './packagePath.ts';
 
@@ -10,12 +10,8 @@ function readFile(filename: string): string {
   return fs.readFileSync(fullPathFilename).toString();
 }
 
-// A report's category groups it with related reports in the admin's report
-// list (camphoric/camphoric#992). import-spec 1.1.0 accepts the field but
-// doesn't type it yet: drop this once this event needs 1.2.0.
-type Report = SpecReport & { category?: string };
-
-// Every report renders on the server from Camphoric's variables (DR-41). Each
+// Every report renders on the server from Camphoric's variables (DR-41). Its
+// category groups it with related reports in the admin's report list. Each
 // title is unique: the import tools after 2.2.0 update an event's report of
 // the same title, so two with one title would be imported into one.
 const reports: Report[] = [
