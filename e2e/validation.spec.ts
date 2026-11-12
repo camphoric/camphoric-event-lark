@@ -20,24 +20,24 @@ const CREDENTIALS = 'Relevant credentials and certifications';
 // The browser checks a required text field itself, before the form does; the
 // form checks the rest, with its "required" message (H6)
 const CHECKED_BY_FORM = ['Select a camp'];
-
-// Found by D1: the phone widget starts with the country code (+1), which the
-// pattern takes, so a registration without a phone number goes through
-const NOT_REQUIRED_YET = ['Phone Number'];
+// The phone widget always holds its dial code ("+1 "), so the browser takes it;
+// since Camphoric v0.18.0 the form counts a dial code alone as empty (found by
+// D1) and marks the field invalid itself
+const CHECKED_BY_WIDGET = ['Phone Number'];
 
 // D1: each required answer, left out by itself
 for (const field of requiredFields) {
-  const it = NOT_REQUIRED_YET.includes(field) ? test.fail : test;
-  it(`a registration without "${field}" isn't submitted`, async ({ page, registration }) => {
+  test(`a registration without "${field}" isn't submitted`, async ({ page, registration }) => {
     const camper = await fillRequired(registration, [field]);
     await expectRejected(page, registration);
-    // (Today's gap fails just here; the rest checks how a field is marked)
-    if (NOT_REQUIRED_YET.includes(field)) return;
+    const control = registration.field(field).or(camper.field(field)).first();
     if (CHECKED_BY_FORM.includes(field)) {
       await expect(camper.message(messages['*'].required).first()).toBeVisible();
       await expectNoRawMessages(page);
+    } else if (CHECKED_BY_WIDGET.includes(field)) {
+      await expect(control).toHaveAttribute('aria-invalid', 'true');
+      await expectNoRawMessages(page);
     } else {
-      const control = registration.field(field).or(camper.field(field)).first();
       await expect(control).toHaveJSProperty('validity.valid', false);
     }
   });
@@ -139,25 +139,31 @@ test.fixme('unusual but valid email addresses are accepted for registrant and ca
   await expect(page).toHaveURL(/\/register\/payment/);
 });
 
-// H1: Jed's donation of 3.50 was "demanding an integer value"
-for (const donation of ['1.1', '3.5']) {
-  test(`a donation of ${donation} is rejected with a plain message`, async ({ page, registration }) => {
+// H1: Jed's donation of 3.50 was "demanding an integer value". Since Camphoric
+// v0.18.0 the field takes no decimal point, so a fraction can't be typed and
+// there's no message to see: the whole dollars are kept.
+for (const [typed, kept] of [['1.1', 1], ['3.5', 3]] as const) {
+  test(`a donation typed as ${typed} is kept as $${kept}`, async ({ registration }) => {
     await fillRequired(registration);
-    await registration.fill(DONATION, donation);
-    await expectRejected(page, registration);
-    await expect(registration.message(messages.lta_donation.type).first()).toBeVisible();
-    await expectNoRawMessages(page);
+    const donation = registration.field(DONATION);
+    await donation.fill(typed);
+    await donation.blur();
+    await expect(donation).toHaveValue(`$${kept}`);
+    await registration.expectTotal(pricing.full_adult + kept);
+    await registration.submit();
+    await registration.expectPaymentStep();
   });
 }
 
-// (B5: the field itself turns a negative donation into $0)
-test('a negative donation becomes $0', async ({ registration }) => {
+// (B5: the field takes no minus sign, since Camphoric v0.18.0, so a donation
+// can't be negative)
+test('a donation can\'t be typed negative', async ({ registration }) => {
   await fillRequired(registration);
   const donation = registration.field(DONATION);
   await donation.fill('-1');
   await donation.blur();
-  await expect(donation).toHaveValue('$0');
-  await registration.expectTotal(pricing.full_adult);
+  await expect(donation).toHaveValue('$1');
+  await registration.expectTotal(pricing.full_adult + 1);
 });
 
 // H2 (and B3): Mahati's pronouns over the limit gave "errors in the name badge field"

@@ -1,4 +1,4 @@
-import { expect, test as base } from '@camphoric/camphoric-event-import-tools/e2e';
+import { adminCredentials, expect, test as base } from '@camphoric/camphoric-event-import-tools/e2e';
 import { request, type BrowserContextOptions, type Page } from '@playwright/test';
 
 import reports from '../reports.ts';
@@ -67,14 +67,10 @@ interface AdminSession {
 }
 
 // The admin is signed in with a session cookie (the browser's admin doesn't
-// take the API token). The global setup's import signs in with
-// DJANGO_SUPERUSER_USERNAME / _PASSWORD (import-tools' getAuthToken), which
-// the workers inherit.
+// take the API token the event was imported with), as the throwaway server's
+// admin, whose username and password the global setup leaves for the workers.
 async function signIn(baseURL: string, eventId: number): Promise<AdminSession> {
-  const { DJANGO_SUPERUSER_USERNAME: username, DJANGO_SUPERUSER_PASSWORD: password } = process.env;
-  if (!username || !password) {
-    throw new Error('no admin credentials: the global setup\'s import sets DJANGO_SUPERUSER_USERNAME / _PASSWORD');
-  }
+  const { username, password } = adminCredentials();
   const api = await request.newContext({ baseURL });
   try {
     await api.get('/api/set-csrf-cookie');
@@ -139,6 +135,20 @@ const test = base.extend<{ adminSession: AdminSession, problems: string[] }>({
 // admin's layout
 test.skip(({ isMobile }) => isMobile, 'reports render on the server: desktop is enough');
 
+// Reports known to read a field Lark doesn't define, as __tests__/reportVariables
+// test's knownMissing lists them: since Camphoric v0.18.0 the server warns about
+// those too (camphoric#994), but only when a registration reaches the line, so
+// whether one shows depends on what the tests have registered: a known warning
+// may show, and any other fails. Each is a fix to make, and is removed from
+// here with it. (#21's report, "Campers, Parking Exceptions", reads a registration
+// admin field that the server doesn't warn about.)
+const knownWarnings: Record<string, string[]> = {
+  'Campers, By Zip Code (For Carpool)': ['line 31: warning: camper.attributes has no field \'phone\''], // #22
+  'Campers, Confirmation Email Info': [
+    'line 97: warning: camper.admin_attributes has no field \'meal_assignment\'', // #23
+  ],
+};
+
 async function openReports(page: Page, organizationId: number, eventId: number) {
   await page.goto(`/admin/organization/${organizationId}/event/${eventId}/reports`);
   await expect(page.getByRole('heading', { name: 'Reports', level: 2 })).toBeVisible();
@@ -159,9 +169,11 @@ for (const { title, output } of reports) {
     };
     expect(error ?? '', 'the server\'s render error').toBe('');
     // The server's warnings: a field a Camphoric object doesn't have
-    // (camper.frist_name) renders blank but is flagged here
-    expect(diagnostics.map(d => `line ${d.line ?? '?'}: ${d.severity}: ${d.message}`),
-      'the server\'s render warnings').toEqual([]);
+    // (camper.frist_name) renders blank but is flagged here, apart from the
+    // known ones
+    const known = knownWarnings[title] ?? [];
+    expect(diagnostics.map(d => `line ${d.line ?? '?'}: ${d.severity}: ${d.message}`)
+      .filter(warning => !known.includes(warning)), 'the server\'s render warnings').toEqual([]);
     if (output === 'csv') expect(csvProblems(report ?? ''), 'the CSV\'s shape').toEqual([]);
 
     await expect(page.getByRole('heading', { name: title, level: 3 })).toBeVisible();

@@ -84,10 +84,10 @@ test('no template value is left unfilled', async ({ page, registration }) => {
   await check();
 });
 
-// Found while writing these (a Camphoric client gap: a number field's
-// description isn't rendered as markdown): the donation's description is shown as text, so
-// its link reads "[https://www.larkcamp.org/](https://www.larkcamp.org/)"
-test.fail('the donation description shows its link, not markdown', async ({ registration }) => {
+// Found while writing these: before Camphoric v0.18.0 a number field's
+// description was shown as text, so the donation's link read
+// "[https://www.larkcamp.org/](https://www.larkcamp.org/)"
+test('the donation description shows its link, not markdown', async ({ registration }) => {
   await registration.open();
   await expect(registration.message(/\]\(https?:/)).toHaveCount(0);
 });
