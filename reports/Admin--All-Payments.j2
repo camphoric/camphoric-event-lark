@@ -5,7 +5,10 @@
     refund's amount is negative, and Refund Of is the ID of the payment it
     gives money back from. PayPal ID is PayPal's transaction id: a payment's
     capture (its `paypal_response` is the whole PayPal order), a refund's own
-    id. Payer is the billing name the registration gave. -#}
+    id. Payer is the billing name the registration gave. Deleted payments
+    aren't listed, nor are those of a deleted registration (deleting one
+    deletes its payments): money they record still moved, so a gap when
+    reconciling may be one of them. -#}
 {%- set dated = payments | selectattr('paid_on') | sort(attribute='id') | sort(attribute='paid_on') | list -%}
 {%- set undated = payments | rejectattr('paid_on') | sort(attribute='id') | list -%}
 ID,Paid On,Recorded,Kind,Method,Amount,Registration,Payer,Registrant Email,Invoice,Refund Of,PayPal ID,Notes
