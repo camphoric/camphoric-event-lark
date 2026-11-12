@@ -140,11 +140,11 @@ test.skip(({ isMobile }) => isMobile, 'reports render on the server: desktop is 
 // those too (camphoric#994), but only when a registration reaches the line, so
 // whether one shows depends on what the tests have registered: a known warning
 // may show, and any other fails. Each is a fix to make, and is removed from
-// here with it. (#21's report, "Campers, Parking Exceptions", reads a registration
+// here with it. (#21's report, Campers' "Parking Exceptions", reads a registration
 // admin field that the server doesn't warn about.)
 const knownWarnings: Record<string, string[]> = {
-  'Campers, By Zip Code (For Carpool)': ['line 31: warning: camper.attributes has no field \'phone\''], // #22
-  'Campers, Confirmation Email Info': [
+  'By Zip Code (For Carpool)': ['line 31: warning: camper.attributes has no field \'phone\''], // #22
+  'Confirmation Email Info': [
     'line 97: warning: camper.admin_attributes has no field \'meal_assignment\'', // #23
   ],
 };
@@ -154,12 +154,15 @@ async function openReports(page: Page, organizationId: number, eventId: number) 
   await expect(page.getByRole('heading', { name: 'Reports', level: 2 })).toBeVisible();
 }
 
-for (const { title, output } of reports) {
+for (const { category, title, output } of reports) {
   test(`the report "${title}" renders`, async ({ page, eventId, adminSession, problems }) => {
     await openReports(page, adminSession.organizationId, eventId);
 
     const rendered = page.waitForResponse(response => /\/api\/reports\/\d+\/render$/.test(response.url()));
-    await page.getByRole('button', { name: title, exact: true }).click();
+    // Listed in its category's group, so a category the server drops fails
+    // here (every report has one: __tests__/reports.test.ts)
+    await page.getByRole('group', { name: category, exact: true })
+      .getByRole('button', { name: title, exact: true }).click();
     const response = await rendered;
     expect(response.status(), `rendering answered ${response.status()}: ${await response.text()}`).toBe(200);
     const { report, error, diagnostics = [] } = await response.json() as {
