@@ -165,9 +165,9 @@ const reports = event.data.reports.map(report => ({ ...report, uses: uses(report
 // Names already known to be missing, each with a TODO in its template and an
 // issue to fix it. Fixing one fails the test until it's taken off this list.
 const knownMissing: Record<string, string[]> = {
-  'Campers, By Zip Code (For Carpool)': ['camper attributes: phone'], // #22
-  'Campers, Confirmation Email Info': ['camper admin_attributes: meal_assignment'], // #23
-  'Campers, Parking Exceptions': ['registration admin_attributes: parking_exception'], // #21
+  'By Zip Code (For Carpool)': ['camper attributes: phone'], // #22
+  'Confirmation Email Info': ['camper admin_attributes: meal_assignment'], // #23
+  'Parking Exceptions': ['registration admin_attributes: parking_exception'], // #21
 };
 
 const describeUse = ({ kind, owner, name }: Use) =>
@@ -181,7 +181,7 @@ describe('report templates', () => {
       expect(all.some(use => use.kind === kind)).toBe(true);
     }
     // A variable set to a pricing result ({% set p = camper.pricing %})
-    const nonMeal = reports.find(report => report.title === 'Admin, non-meal income');
+    const nonMeal = reports.find(report => report.title === 'Non-meal income');
     expect(nonMeal?.uses).toContainEqual({ kind: 'pricing', owner: 'camper', name: 'tuition' });
   });
 
