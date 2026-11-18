@@ -89,10 +89,8 @@ test('a registration with nothing to pay can be finished', async ({ page, admin,
   await finishWithNothingDue(page);
 });
 
-// E6, full-trade kitchen crew: #14 expects $0, but kitchen-full is in crewCamp
-// and pays the $60 enrollment fee, while its invitation says Lark is free with
-// a full trade (#16). This pins today's charge (meals are free) until that's
-// decided.
+// E6, full-trade kitchen crew: their full trade covers tuition and meals, but
+// like the other crew they pay the enrollment fee (#16), as their invitation says
 test('full-trade kitchen crew pay only the enrollment fee', async ({ page, admin, registration }) => {
   const camper = await fillInvited(page, admin, registration, 'kitchen-full');
   await chooseMeals(camper, mealsLookup.F);

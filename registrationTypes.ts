@@ -78,7 +78,11 @@ lodging that is not on the list, and you have cleared this with the registrar
 already, please describe your needs in the lodging preferences box, and select
 "Let registrar assign my lodging" as your lodging choice.  
 
-Select “pay by check” on the final step as your cost to attend Lark is free with a full trade.  
+Your full trade covers your tuition and meals.
+You will be charged a non-refundable enrollment fee of $${pricing.crew_enrollment}, and $${pricing.crew_parking_pass} for each
+parking pass, plus a name badge if you add one. Pay what's due on the final step.
+
+If you need a parking pass YOU MUST ADD ONE. This is not done automatically.
 
 If you have any questions about registering, please email us at
 [registration@larkcamp.org](mailto:registration@larkcamp.org) or call
