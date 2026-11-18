@@ -107,7 +107,7 @@ test('with no tuition or meals, the deposit is the whole total', async ({ page, 
 
 // C4: sheet row "Rounding Error" (Meghan). Camp 1 cleanup crew in an RV, Just
 // Dinners and a parking pass: $371, $382.13 online ($380.275, a half cent, at
-// the old 2.5%; at 3% a whole-dollar total has none, but the check is kept)
+// the old 2.5%; C5's deposit case is a half cent at 3%)
 test('paying by check doesn\'t round the total up', async ({ page, admin, registration }) => {
   const camper = await fillInvited(page, admin, registration, 'cleanup-camp-1');
   await camper.chooseLodging('Camp 1', 'RV', 'RV under 15\' long');
@@ -122,8 +122,9 @@ test('paying by check doesn\'t round the total up', async ({ page, admin, regist
 });
 
 // C5: sheet row "payment" (Mahati); M. Jones 2/20: PayPal hung at $1460.63, a
-// half cent before rounding at the old 2.5%, but not at $943.00. At 3% they're
-// $1467.75 and $947.60, neither a half cent, but the order must still match.
+// half cent before rounding at the old 2.5%, but not at $943.00. At 3% those
+// are $1467.75 and $947.60, whole cents; an amount ending in 50 cents still
+// makes a half cent, as the deposit case below does.
 for (const [what, meals, amount] of [['All Meals', mealsLookup.F, '1467.75'], ['no meals', 'No meals', '947.60']]) {
   test(`an adult with ${what} can be sent to PayPal, to the cent`, async ({ registration, payPal }) => {
     const camper = await fillRequired(registration);
@@ -136,6 +137,24 @@ for (const [what, meals, amount] of [['All Meals', mealsLookup.F, '1467.75'], ['
     expect(order.amount).toBe(shown.toFixed(2));
   });
 }
+
+// C5 at 3%: half the meals is $252.50, so an adult with All Meals paying the
+// 50% Deposit pays $712.50 now, $733.875 online before rounding: a half cent,
+// which the order must round as the payment step shows it
+test('an adult with All Meals on the deposit can be sent to PayPal, to the cent', async ({ registration, payPal }) => {
+  const camper = await fillRequired(registration);
+  await chooseMeals(camper, mealsLookup.F);
+  const total = pricing.full_adult + pricing.meals_adult_full;
+  await submitExpectingDue(registration, total);
+  await registration.choosePaymentOption(DEPOSIT);
+  const now = deposit(total, pricing.full_adult, pricing.meals_adult_full);
+  expect(now).toBe(712.50);
+  await expectDue(registration, now);
+  const shown = await registration.paymentTotal('online');
+  const order = await payPal.order(await registration.startOnlinePayment());
+  expect(order.amount).toBe('733.88');
+  expect(order.amount).toBe(shown.toFixed(2));
+});
 
 // C7: Madelyn asked whether a full payment is refundable
 test('the payment step explains what the deposit covers', async ({ page, registration }) => {
