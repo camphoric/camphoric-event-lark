@@ -167,7 +167,6 @@ const reports = event.data.reports.map(report => ({ ...report, uses: uses(report
 const knownMissing: Record<string, string[]> = {
   'By Zip Code (For Carpool)': ['camper attributes: phone'], // #22
   'Confirmation Email Info': ['camper admin_attributes: meal_assignment'], // #23
-  'Parking Exceptions': ['registration admin_attributes: parking_exception'], // #21
 };
 
 const describeUse = ({ kind, owner, name }: Use) =>
