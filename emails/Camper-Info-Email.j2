@@ -1,0 +1,162 @@
+{#- Sent to each camper about a week before camp: their stay, meals, lodging, parking and arrival,
+    then reminders for everyone. Converted from lark-camp-admin-tool's Blade template (#8).
+    Yearly edits are in the event's template vars (regTemplateVars.ts). -#}
+{%- set attrs = camper.attributes -%}
+{%- set admin = camper.admin_attributes -%}
+{#- Only a lodging in a camp counts: a camper who chose "Let registrar assign my lodging" or
+    "Off Site" has that as their lodging until the registrar places them -#}
+{%- set path = camper.lodging.path_names if camper.lodging else [] -%}
+{%- set path = path if path and path[0].startswith('Camp ') else [] -%}
+{#- The lodging without its spot, e.g. Camp 1 → Tent → Area A -#}
+{%- set lodging_names = [] -%}
+{%- for name in path if not name.startswith('Spot ') -%}
+  {%- do lodging_names.append(name) -%}
+{%- endfor -%}
+{%- set lodging = lodging_names | join(' → ') -%}
+{%- set camp = path[0] if path else '' -%}
+{#- Camp 3 eats in Camp 2 -#}
+{%- set meal_camp = 'Camp 2' if camp == 'Camp 3' else camp -%}
+{%- set reg_type = (registration.registration_type.name if registration.registration_type else '') | lower -%}
+{%- set meal_plan = ((attrs.meals or {}).meal_plan or '') -%}
+{%- set has_meals = meal_plan and 'no meal' not in (meal_plan | lower) -%}
+{%- set has_breakfast = has_meals and 'just dinner' not in (meal_plan | lower) -%}
+{%- set vars = event.template_vars -%}
+{#- The first day of the camper's session: the event's second day (a Friday) for full camp and the
+    first half, its sixth (a Tuesday) for the second half, as regTemplateVars.ts has them -#}
+{%- if event.days | length > 5 -%}
+  {%- set arrives = event.days[5] if attrs.session == 'Half camp - 2nd half' else event.days[1] -%}
+{%- else -%}
+  {%- set arrives = none -%}
+{%- endif -%}
+{#- Where the camper eats: the registrar's assignment, else their camp's kitchen; anything but a camp
+    is unassigned -#}
+{%- set breakfast_in = admin.meal_assignment_breakfast or meal_camp or '' -%}
+{%- set dinners_in = admin.meal_assignment_dinner or meal_camp or '' -%}
+Dear {{ attrs.first_name or 'Camper' }},
+
+We're just a week away from Lark Camp and we're very excited! You may be receiving this email on behalf of another camper, and if so, please forward or share this email with the intended recipient.
+
+We are looking forward to seeing you soon! This year you won't be receiving anything from Lark Camp via post. You do not need to fill out anything ahead of time or bring paper forms with you. All the information you need is in this email.
+
+Please read the following information carefully, and let us know that everything looks correct to you. If you see something that looks amiss, please email [registration@larkcamp.org](mailto:registration@larkcamp.org) with the subject "request for registration change" and we will do our best to accommodate you.
+
+[Visit this document for detailed general information about camp](https://docs.google.com/document/d/1Vx2x29oKLjBtANDZKu9keJbHf61FxXnY-xjkISEZw2k/edit)
+
+You will need to present a picture of a negative COVID test taken within 48 hours when you arrive at camp. Please save this picture on your phone so that we can verify this before you enter camp. Do NOT email in the photo.
+
+If you have a balance due, you should have received an email from PayPal asking to pay it. If you believe your balance is not correct, or you did not receive that email, please contact the registrar at [registration@larkcamp.org](mailto:registration@larkcamp.org)
+
+{% if admin.guardian_forms_required and not admin.guardian_forms_received -%}
+**WE HAVE NOT RECEIVED YOUR GUARDIAN FORMS!**
+
+If we do not receive your guardian forms filled out and returned to LTA by a parent or legal guardian by {{ vars.guardian_forms_due_date }} you cannot come to camp.
+
+[Guardian Form](https://docs.google.com/document/d/1P-JNJkSOpWKzUqGvo61IaqsKNSuzruLmt3o6t6Jchz8/edit?usp=sharing)
+
+{% endif -%}
+**Stay:** {{ attrs.session or '' }}
+
+**Meal Plan:** {{ meal_plan or 'No meal plan' }}
+
+**Lodging Location:** {{ lodging or 'To be assigned' }}
+
+{% if has_breakfast -%}
+**Breakfast in:** {{ breakfast_in if breakfast_in.startswith('Camp') else 'Unassigned' }}
+
+{% endif -%}
+{% if has_meals -%}
+**Dinners in:** {{ dinners_in if dinners_in.startswith('Camp') else 'Unassigned' }}
+
+{% endif -%}
+{% if camp == 'Camp 1' and 'Area A' in lodging_names -%}
+### IMPORTANT - MEDICAL AIR EVACUATION INFO FOR THE MEADOW
+
+In the unlikely event that a medical air evacuation is needed, Tent Area A (aka The Meadow in Camp 1) is the designated emergency helicopter landing area at the Mendocino Woodlands.
+
+* Only unstaked tents with lightweight frames are allowed in Area A.
+* No metal popup canopies or metal frame tents or structures are allowed.
+
+If Lark Camp is notified to clear the meadow for emergency helicopter landing, all available campers will pull all the tents and contents within 15 minutes to the side of the meadow. After the air evacuation is complete, the tent's owner sets their own tent back up. By camping in Area A, you accept the risk of possible damage to your property in the event of an emergency, and will not hold Lark Camp, the Mendocino Woodlands Camp Association, Emergency Responders, or Good Samaritans responsible.
+
+{% endif -%}
+{% if camp == 'Camp 2' -%}
+Please do not plug into RV shore power unless you require a CPAP medical device. Running power to your campsite is not allowed unless you're in a designated CPAP cabin. Using microwaves, fridges, or any high-power device is not allowed. The last few camps have caused the camp 2 breakers to trip daily, and if this keeps happening we'll have to ban use of electrical outlets completely. Please also note that you may not use RV generators inside of camp.
+
+{% endif -%}
+**Parking:**
+
+{% for pass in attrs.parking_passes or [] -%}
+{{ loop.index }}. {{ [pass.pass_type, pass.vehicle_type] | select | join(' - ') }}
+{% else -%}
+No parking pass
+{% endfor %}
+**Day of Arrival:** {{ (arrives | date('%A, %B %-d, %Y')) if arrives else 'See your registration' }}
+
+{% if admin.registration_volunteer -%}
+We appreciate your willingness to come early and help! On Thursday evening and Friday before dinner the kitchen is preparing meals ONLY for those who sign up for pre-camp meals in advance. If you are on a meal plan, you are NOT automatically signed up for pre-camp meals.
+
+[Please plan on bringing your own food, or signing up for pre-camp meals here]({{ vars.precamp_meals_url }})
+
+Please note that these meals are NOT included in your pre-paid meal plan. Please bring cash to pay for your pre-camp meals, we are not able to accept payment for these meals ahead of time.
+
+{% endif -%}
+{% if 'kitchen' in reg_type -%}
+You should receive an email from the kitchen about your shifts and arrival time. If you do not hear from the kitchen by {{ vars.kitchen_contact_by_date }}, please contact the kitchen at [larkkitchen@gmail.com](mailto:larkkitchen@gmail.com)
+
+{% endif -%}
+#### WE LOOK FORWARD TO SEEING YOU AT CAMP!
+
+#### READ ON FOR MORE INFORMATION
+
+## Reminders For Everyone
+
+* **ALWAYS CARRY YOUR FLASHLIGHT!** Don't forget to bring a FLASHLIGHT or HEADLAMP & spare batteries!
+* There is no WIFI at camp. If you have Verizon as your phone provider, you might be able to make a call or send a text out in one location at camp (ask us when you're there), but there's not enough signal strength to be able to read or send email. If someone needs to reach you for a genuine emergency, they can call the Mendocino Woodlands office. Their staff will relay a message to our staff, and we'll track you down.
+* You will want your phone for photos and recording at workshops, and possibly alarms and reminders, but there are limited places to plug in and recharge. Please, be responsible about removing your phone from where you're charging so others can have a chance to do so, too. You might consider bringing a battery bank or a solar phone charger.
+* As noted in our last newsletter, bears have been seen recently at camp. In addition, mice, chipmunks, skunks and racoons are ever present in the redwoods. These critters have "a particular set of skills" when it comes to food. Do not store or eat food in your car, cabin, or tent!
+* Bring your mosquito/tick repellent! Those in the know say it's a big year for the bugs at camp.
+* **Fire rules:** No candles, stoves, or lanterns with flames! Break this rule once and you will be ejected from camp. $250.00 fine! Help keep us all safe!
+* Park where you are assigned, in the proper fire exit direction. Cars parked incorrectly will be towed away at the owner's expense.
+* When driving, do not exceed 5 MPH and use headlights for safety. This keeps dust down and people safe!
+* Bike riding ON THE ROAD ONLY. Walk your bike on any other paths.
+* Do not store personal items in bathhouses.
+* Parents must take full responsibility for their children at all times and in all situations.
+* No pets allowed (for everyone's safety). $250.00 fine for breaking this rule.
+* **LARK CAMP ASSUMES NO RESPONSIBILITY FOR PERSONAL BELONGINGS OR VEHICLES.**
+
+## CARPOOLING
+
+Please offer rides to campers! We have some folks who are still hoping to carpool to camp, including crew members who need to arrive on Thursday. Parking passes are refundable, so carpooling has benefits! [Post a ride request or offer](https://groupcarpool.com/t/usfk0v)
+
+## REGARDING WATER & SHOWERS
+
+Water in the Woodlands comes from a tank that is fed by a well. This means water is limited! Please take VERY short and infrequent showers.
+
+{% if 'Cabin' in lodging -%}
+### CABIN LODGING
+
+* No nails, pushpins, or staples in any building or cabin. Preserve our historic buildings.
+* Leave your cabin or camping area perfectly clean! Another group moves into the Woodlands as we move out. Help our volunteers by not creating extra work for them. You can find brooms in bathroom storerooms.
+
+{% endif -%}
+## IF YOU ARE NEW TO LARK CAMP
+
+We suggest arriving early (that is, anytime AFTER 3:00pm) to have time to get settled in before it's dark in an unfamiliar place.
+
+**CAMP 1 Newcomer Orientation** Saturday at 8:30am & Tuesday at 6:00pm (meet on or near the steps outside the office).
+
+**CAMP 2 Newcomer Orientation** Saturday at 8:30am & Tuesday at 6:00pm (meet at the inner fire circle by the Coffeehouse).
+
+## WORK TRADE POSITIONS
+
+All Work Trade Crews are full.
+
+If you are signed up for camp, the kitchen may have availability to allow you to wash dishes, etc. in trade for meals. Contact our caterer at: [larkkitchen@gmail.com](mailto:larkkitchen@gmail.com)
+
+## MEDICAL GOOD SAMARITANS
+
+If you have mental health or medical training and are willing to help please email will@larkcamp.org for more information.
+
+[Visit this document for even more information about camp](https://docs.google.com/document/d/1Vx2x29oKLjBtANDZKu9keJbHf61FxXnY-xjkISEZw2k/edit)
+
+[Lark Camp map and site info](https://drive.google.com/file/d/1r6n7k69RS5DshpOcnJTPGDLGCTKIREqI/view)

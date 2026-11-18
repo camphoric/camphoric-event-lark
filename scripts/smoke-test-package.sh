@@ -25,6 +25,7 @@ tar -tzf "$TARBALL" > files.txt
 grep -q '^package/dist/index\.js$' files.txt
 grep -q '^package/dist/index\.d\.ts$' files.txt
 if [ -d "$ROOT/reports" ]; then grep -q '^package/reports/' files.txt; fi
+if [ -d "$ROOT/emails" ]; then grep -q '^package/emails/' files.txt; fi
 UNWANTED='__tests__|e2e/|scripts/|addRegistrations|jest\.config|playwright\.config|tsconfig|eslint\.config|\.github'
 if grep -qE "$UNWANTED" files.txt; then
   echo "$TARBALL holds files it shouldn't:" >&2
@@ -70,6 +71,7 @@ assert.match(import.meta.resolve(process.env.NAME), /\/dist\/index\.js$/);
 assert.deepEqual(validateEventImport(event.data), []);
 assert.equal(event.organization.organization.name, event.data.organization);
 for (const report of event.data.reports) assert.ok(report.template.trim(), report.title + ' has no template');
+for (const email of event.data.email_templates ?? []) assert.ok(email.body.trim(), email.name + ' has no body');
 
 // Its overrides and sample registrations run from the build too
 const lodging = new Proxy({}, { get: (_, key) => ({ id: 1, name: String(key) }) });

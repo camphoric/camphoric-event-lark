@@ -19,6 +19,7 @@ import registration_error_messages from './registrationErrorMessages.ts';
 import lodgings from './lodgings.ts';
 import promo_codes from './promoCodes.ts';
 import reports from './reports.ts';
+import email_templates from './emails.ts';
 import makeRegistrations from './testRegistrations.ts';
 import registration_template_vars from './regTemplateVars.ts';
 import registration_deposit_schema from './registrationDepositSchema.ts';
@@ -84,6 +85,7 @@ const data: EventImport = {
 
   lodgings,
   reports,
+  email_templates,
   registration_types,
   promo_codes,
   custom_charge_types: [

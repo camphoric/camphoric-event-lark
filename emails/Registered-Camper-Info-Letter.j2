@@ -1,0 +1,117 @@
+{#- Sent to every registered camper ahead of camp: COVID, arrival and departure, rules, balances
+    and camp life. Converted from lark-camp-admin-tool's Blade template (#8). The camp starts on a
+    Thursday (dates.ts) and registration opens on its Friday, the event's second day. -#}
+{%- set camp_year = event.start | date('%Y') -%}
+{%- set opening_day = event.days[1] if event.days | length > 1 else event.start -%}
+**WELCOME TO LARK CAMP {{ camp_year }}!!**
+
+## COVID and Lark Camp
+
+There is no longer a vaccine requirement. All Campers must present a negative Covid test taken within the 48 hours before camp and are strongly encouraged to test as close to arrival as possible. Any over-the-counter test is fine, as is a timed photo of it. Do NOT email us a photo.
+
+If you test positive for COVID just before camp, text or email us (707) 397-5275 or [registration@larkcamp.org](mailto:registration@larkcamp.org), to say you are not coming; we will refund your money if you need to cancel for COVID-related reasons. If you develop symptoms while at camp, some test kits will be available for purchase at the camp offices. If you test positive for COVID at camp, please report to camp staff promptly.
+
+Everyone attends camp at their own risk. Updates based on CDC recommendations may be sent out shortly before camp.
+
+## Arrival at Camp
+
+Detailed directions are here: [Getting to Lark Camp](https://www.larkcamp.org/about/#Getting_to_Lark_Camp)
+
+Registration opens at 3:00 pm, {{ opening_day | date('%A, %B %-d, %Y') }} (noon on Tuesday for 2nd Half campers). Campers and Instructors: Please do not arrive at camp before 3:00 pm on Friday unless you have been confirmed as an early arrival on a work crew or to help with registration. A limited number of volunteers are needed to arrive early and help with registration. If you would like to do this contact [registration@larkcamp.org](mailto:registration@larkcamp.org)
+
+Note that Vehicle Registration forms and Waivers will now be completed at Registration. Paper forms are no longer sent.
+
+## Departure from Camp
+
+The 1st half campers need to depart before noon/lunch on Tuesday. Full campers and 2nd half campers need to depart before 9am on Saturday morning. We block the road with a trailer to dismantle the Dance Pavilion in Camp 1 starting Saturday morning at 9am, so if you are still in camp you'll be blocked from leaving until 11am and conscripted to help break down camp.
+
+If you plan on leaving a day early, please let us know when you register so that we have an accurate census for the campsite.
+
+## If you are new to Lark Camp...
+
+We suggest arriving early (that is, anytime after 3:00 pm) to have time to get settled in before it's dark in an unfamiliar place. Have a look at this detailed list of things to bring to camp: Michael's Ridiculously Simplified Lark List.pdf
+
+Bring acoustic instruments. There is little facility for electric instruments at camp.
+
+**Newcomer Orientation sessions at Camps 1 & 2**\
+Saturday 8:30 am & Tuesday 6:00 pm (both camps)
+
+* Camp 1: Meet at the steps outside the office
+* Camp 2: Meet at the inner fire circle by the Coffeehouse
+
+We still have space available for Lark Camp {{ camp_year }}
+
+* Lark Camp Website: [larkcamp.org](https://www.larkcamp.org/)
+* Registration info: [larkcamp.org/register](https://www.larkcamp.org/register/)
+
+---
+
+## Camp Rules and Restrictions
+
+It is very important that you read the [Camp Rules in detail here](https://www.larkcamp.org/about/#Lark_Camp_Rules_Restrictions)
+
+Violation of some rules may result in expulsion from camp without warning or refund:
+
+* Cooking is only allowed in a camper with a real built-in kitchen. No camp stoves, no open fires. No candles or gas lanterns.
+* Smoking/vaping in designated areas only.
+* Rules regarding alcohol, cannabis, drugs, and minors need to be followed.
+* Code of Conduct - Lark Camp does not tolerate any form of harassment. Please read our [Code of Conduct](https://www.larkcamp.org/code-of-conduct/) so you understand what constitutes harassment and how to help anyone who is being harassed.
+
+Other important rules:
+
+* No driving after arrival at camp. Bike, walk or use the regular shuttle buses between camps. The shuttle schedule will be posted at each camp.
+* Bicycle use is encouraged; you may bike only on the road, not on pedestrian paths.
+* Parents or guardians are 100% responsible for minors in their charge.
+* Park only where assigned in the proper fire exit direction. Cars parked incorrectly will be towed at the owner's expense.
+* No day visitors. No animals allowed at camp.
+
+## Balances Due
+
+* If you owe a balance for your tuition and/or meals, it is due by {{ event.template_vars.meals_due_date }}. Check your registration email to see if you have a balance due.
+* You can send a check anytime to: Lark Camp, PO Box 1724 Mendocino, CA 95460 (make sure you write the name of the person who registered on the check).
+* If you have paid your deposit by credit card or PayPal, sit tight and we'll email an invoice to you soon. Or if you prefer to get it done now, email [registration@larkcamp.org](mailto:registration@larkcamp.org) and request a PayPal invoice.
+
+## Work Trade Positions
+
+We still have work trade positions available. Email [volunteer@larkcamp.org](mailto:volunteer@larkcamp.org) if you are interested. The kitchen may also have availability for work trade applicants. You can learn more and [apply for kitchen crew here](https://bit.ly/larkkitchen)
+
+## Other Important Information
+
+* **Workshop, Dance, and Evening Events Schedule:** Changes and additions always happen; see the latest at [workshops](https://www.larkcamp.org/workshops/) and [events](https://www.larkcamp.org/events/). Up to date schedules will be posted outside the dining halls at camp.
+* Lark Campers are encouraged to not only take workshops, but also give them (without compensation). If you want to lead a workshop of any length at Lark Camp, check the schedule for an open slot, and email us with the details; we will add it to the schedule if possible. You can also write in a workshop on the master schedule posted in each camp.
+* **Weather at Camp:** Usually warm days and cool, even cold, nights. Always a chance of drizzle. Be comfortable - bring clothing for all types of weather.
+* **Fragrance Free:** For the health of all camp participants, we strongly encourage the use of fragrance-free products at camp (i.e., fragrance free shampoo, soap, and deodorant) and avoid the use of perfume.
+* **Water Conservation:** Please take very short and infrequent showers so we don't run out of our limited water supply.
+* **CPAP users:** we will have limited power specifically for CPAP users in a few Camp 1 cabins. Please email [registration@larkcamp.org](mailto:registration@larkcamp.org) to make arrangements if you need this accommodation. You will need to bring your own 25ft extension cord that is compatible with your machine. We also recommend that you bring a backup power supply in case of power outages.
+* **Carpooling:** Please carpool if possible to help keep Lark Camp's carbon footprint small. Need a ride? Offer a ride? [Post a ride request or offer](https://groupcarpool.com/t/usfk0v)
+* **Library:** Camp Music Library: Instructor provided music from previous years. [library.larkcamp.org](https://library.larkcamp.org/)
+* **Staff Recordings and Merchandise:** Many of our teaching staff offer recordings of their music and teaching materials. We urge you to support these wonderful people and purchase their products in class or at the Swap Meets.
+* **If You Are Camping In Camp 1, Area A:** This is the Medical Air Evacuation area. You must abide by the [rules detailed here](https://www.larkcamp.org/about/#Lark_Camp_Rules_Restrictions)
+* Camp Two will have a [Lark In The Morning](https://larkinthemorning.com/) music store for strings, picks and other useful music items you might need during camp.
+* Camp Three will have a Lark Camp store for batteries, headlamps, bug repellent, toiletries, and other useful items.
+* Please recycle at camp. Please bring all your trash & recycling to the dumpsters rather than leaving it in your cabin, tent site or bathroom trash cans.
+* Please take all used batteries home as the Woodlands does not have battery recycling.
+* **Medical Good Samaritans:** If you have medical training and are willing to help in an emergency please let the staff in the Camp One or Two office know when you arrive at camp.
+* **Evaluation Form:** After camp we will send an email with a link to an evaluation form. Your response is very important to us; it provides information about what works and what doesn't, and helps us make camp a better place.
+* Bring flashlights and plenty of batteries. Lark Camp gets dark at night.
+* No payphones anymore at camp. Extremely limited cell coverage for some carriers.
+
+## Special Events at Camp
+
+* **Swap Meet:** There will be a swap meet on Monday in Camp 1 and Wednesday in Camp 2, 10 am to 5 pm. Bring whatever you'd like to sell, handcrafts encouraged. Note: Lark Camp reserves the right to veto any swap meet items.
+* **Silly Hat Day:** Sunday is Silly Hat Day...why not?
+* **Environmental Education Programs:** The Mendocino Woodlands offers excellent nature oriented programs at no charge during camp.
+* The Musical Instrument Library will be in Camp 3, for checking out instruments, performances, and jams.
+
+More Information Available on the [Lark Camp Website](https://www.larkcamp.org/) - check the "About" and "Events" tabs for more details
+
+Musically yours,\
+Lark Traditional Arts
+
+---
+
+\*\*\* LARK CAMP \*\*\*\
+PO Box 1724, Mendocino, California 95460 USA\
+Lark Camp Phone (707) 397-5275\
+email [registration@larkcamp.org](mailto:registration@larkcamp.org)\
+Lark Camp website [larkcamp.org](https://www.larkcamp.org/)

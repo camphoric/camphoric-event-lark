@@ -21,8 +21,8 @@ npm run build                   # compile index.ts to dist/ (what's published)
 scripts/smoke-test-package.sh   # pack it, install it, and load it from its build with plain Node
 ```
 
-The event's source is TypeScript; the published package is its build (`dist/`) and its report
-templates (`reports/`). The spec is a **peer dependency** (`^1.3.0`, the first with an event's cancellation fee), so Camphoric's importer loads
+The event's source is TypeScript; the published package is its build (`dist/`), its report
+templates (`reports/`) and its group emails' bodies (`emails/`, listed in `emails.ts`). The spec is a **peer dependency** (`^1.3.0`, the first with an event's cancellation fee), so Camphoric's importer loads
 one copy of it for every event; a spec major this event doesn't follow fails to install rather than
 nesting a second copy. Camphoric's `RELEASE.md` ("What a spec version means") describes how a new
 spec major is rolled out.
@@ -84,6 +84,9 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
   later cancellations.
 - `e2e/paymentTypes.spec.ts` signs in the same way and checks that the server offers the event's
   own payment types (Zelle and FCP Credit), as offline types, when a payment is recorded.
+- `e2e/groupEmails.spec.ts` signs in the same way and checks that the group emails are imported,
+  that each renders for every camper it reaches without an error or warning (the server's template
+  check), and that the Good Samaritan email reaches only volunteers.
 - The fixtures: `registration`, a page object for the form (fields by label, campers and their
   lists, lodging, the price ticker, the payment step); `admin`, for invitations and the email the
   server sent; and `payPal`, the orders sent to the fake PayPal. The client's markup lives only
