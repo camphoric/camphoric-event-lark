@@ -18,6 +18,13 @@ const regTemplateVars = {
   full_camp_end_date_time: `${dt({days: lengthInDays})} at 9am`,
 
   meals_due_date: 'June 20th',
+
+  // Yearly edits for the Camper Info Email (emails/): when a minor's guardian
+  // forms are due, when kitchen crew should have heard from the kitchen, and
+  // the pre-camp meals sign-up
+  guardian_forms_due_date: 'July 22nd',
+  kitchen_contact_by_date: 'July 19th',
+  precamp_meals_url: 'https://bit.ly/precampmeals25',
 };
 
 export default regTemplateVars;
