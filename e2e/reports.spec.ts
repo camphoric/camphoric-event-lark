@@ -104,9 +104,6 @@ test.skip(({ isMobile }) => isMobile, 'reports render on the server: desktop is 
 // may show, and any other fails. Each is a fix to make, and is removed from
 // here with it.
 const knownWarnings: Record<string, string[]> = {
-  'Confirmation Email Info': [
-    'line 97: warning: camper.admin_attributes has no field \'meal_assignment\'', // #23
-  ],
 };
 
 async function openReports(page: Page, organizationId: number, eventId: number) {

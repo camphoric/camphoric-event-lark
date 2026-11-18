@@ -92,9 +92,10 @@ last,first,lodging,registration_type,parking_type,stay,balance_due,meal_plan,mea
     {{- camper.attributes.session}},
     {{- '$' ~ camper.registration.balance }},
     {{- (camper.attributes.meals or {}).meal_plan }},
-    {#- TODO: `meal_assignment` isn't a Lark camper admin field (there are meal_assignment_breakfast
-        and meal_assignment_dinner), so this always shows the camp. -#}
-    {{- camper.admin_attributes.meal_assignment or row.camp }},
+    {#- Where the camper eats: the registrar's dinner assignment, else their breakfast one, else their
+        camp, as Kitchen, Meal Totals reads it -#}
+    {{- camper.admin_attributes.meal_assignment_dinner or camper.admin_attributes.meal_assignment_breakfast
+        or row.camp }},
     {{- camper.stay[0]}},
     {{- row.comp_reason or '' }},
     {{- row.crew or '' }},
