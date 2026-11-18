@@ -3,17 +3,17 @@
     Yearly edits are in the event's template vars (regTemplateVars.ts). -#}
 {%- set attrs = camper.attributes -%}
 {%- set admin = camper.admin_attributes -%}
-{#- Only a lodging in a camp counts: a camper who chose "Let registrar assign my lodging" or
-    "Off Site" has that as their lodging until the registrar places them -#}
+{#- A camper who chose "Let registrar assign my lodging" has that as their lodging until the
+    registrar places them, so it isn't one; Off Site, which only the registrar assigns, is -#}
 {%- set path = camper.lodging.path_names if camper.lodging else [] -%}
-{%- set path = path if path and path[0].startswith('Camp ') else [] -%}
+{%- set path = [] if path and path[0] == 'Let registrar assign my lodging' else path -%}
 {#- The lodging without its spot, e.g. Camp 1 → Tent → Area A -#}
 {%- set lodging_names = [] -%}
 {%- for name in path if not name.startswith('Spot ') -%}
   {%- do lodging_names.append(name) -%}
 {%- endfor -%}
 {%- set lodging = lodging_names | join(' → ') -%}
-{%- set camp = path[0] if path else '' -%}
+{%- set camp = path[0] if path and path[0].startswith('Camp ') else '' -%}
 {#- Camp 3 eats in Camp 2 -#}
 {%- set meal_camp = 'Camp 2' if camp == 'Camp 3' else camp -%}
 {%- set reg_type = (registration.registration_type.name if registration.registration_type else '') | lower -%}
