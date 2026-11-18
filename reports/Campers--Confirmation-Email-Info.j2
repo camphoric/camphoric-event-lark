@@ -92,10 +92,10 @@ last,first,lodging,registration_type,parking_type,stay,balance_due,meal_plan,mea
     {{- camper.attributes.session}},
     {{- '$' ~ camper.registration.balance }},
     {{- (camper.attributes.meals or {}).meal_plan }},
-    {#- Where the camper eats: the registrar's dinner assignment, else their breakfast one, else their
-        camp, as Kitchen, Meal Totals reads it -#}
+    {#- Where the camper eats, as Kitchen, Meal Totals reads it: the registrar's dinner assignment,
+        else their breakfast one, else their camp's kitchen (Camp 3 eats in Camp 2) -#}
     {{- camper.admin_attributes.meal_assignment_dinner or camper.admin_attributes.meal_assignment_breakfast
-        or row.camp }},
+        or ('Camp 2' if row.camp == 'Camp 3' else row.camp) }},
     {{- camper.stay[0]}},
     {{- row.comp_reason or '' }},
     {{- row.crew or '' }},
