@@ -105,7 +105,6 @@ test.skip(({ isMobile }) => isMobile, 'reports render on the server: desktop is 
 // here with it. (#21's report, Campers' "Parking Exceptions", reads a registration
 // admin field that the server doesn't warn about.)
 const knownWarnings: Record<string, string[]> = {
-  'By Zip Code (For Carpool)': ['line 31: warning: camper.attributes has no field \'phone\''], // #22
   'Confirmation Email Info': [
     'line 97: warning: camper.admin_attributes has no field \'meal_assignment\'', // #23
   ],

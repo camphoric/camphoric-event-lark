@@ -14,7 +14,7 @@ import { mealsLookup, ageLookup } from './pricing/camperPricingLogic.ts';
  * - every lodging kind the form offers: tents and RVs in each camp, cabins,
  *   registrar's choice, and shared lodging
  * - name badges (with and without pronouns), medical volunteers, campers with
- *   their own email or address, and 0 to 3 parking passes of every kind
+ *   their own email, phone or address, and 0 to 3 parking passes of every kind
  * - donations, comments, payers abroad, and the 50% deposit
  * - names, addresses and comments a CSV report has to quote or escape:
  *   commas, quotes, apostrophes, accents, hyphens and line breaks
@@ -59,6 +59,7 @@ interface Camper {
   lodging: string[],
   sharedWith?: string,
   email?: string,
+  phone?: string,
   badge?: { name: string, pronouns?: string },
   volunteer?: { skills: string[], credentials: string },
   address?: Address,
@@ -130,7 +131,7 @@ const households: Household[] = [
       { first: 'Han', last: 'Solo', age: 49, gender: 'Man', meals: F(), lodging: C1_TENT_B,
         sharedWith: 'Skywalker-Solo family' },
       { first: 'Luke', last: 'Skywalker', age: 49, gender: 'Man', meals: F(VEG), lodging: C1_TENT_B,
-        sharedWith: 'Skywalker-Solo family', email: 'luke.skywalker@dontsend.com' },
+        sharedWith: 'Skywalker-Solo family', email: 'luke.skywalker@dontsend.com', phone: '+16025550111' },
       { first: 'Ben', last: 'Solo', age: 11, gender: 'Man', meals: F(), lodging: C1_TENT_B,
         sharedWith: 'Skywalker-Solo family' },
     ],
@@ -152,7 +153,7 @@ const households: Household[] = [
       { first: 'Beverly', last: 'Crusher', age: 49, gender: 'Woman', meals: F(VEG), lodging: C1_CABIN,
         sharedWith: 'Enterprise crew', volunteer: { skills: ['Medical', 'Emergency management'], credentials: 'MD, Chief Medical Officer' } },
       { first: 'Wesley', last: 'Crusher', age: 17, gender: 'Man', meals: F(VEG), lodging: C1_CABIN,
-        sharedWith: 'Enterprise crew', email: 'wesley.crusher@dontsend.com' },
+        sharedWith: 'Enterprise crew', email: 'wesley.crusher@dontsend.com', phone: '+14155550112' },
     ],
   },
   {
@@ -691,6 +692,7 @@ function makeRegistration(household: Household, lodgingMap: LodgingLookup): Samp
         ...(camper.age ? { age: ageLookup[camper.age] } : {}),
         gender: camper.gender,
         ...(camper.email ? { email: camper.email } : {}),
+        ...(camper.phone ? { phone: camper.phone } : {}),
         session: camper.session ?? 'Full camp',
         meals: mealsOf(camper),
         name_badge: camper.badge ? { purchase: true, ...camper.badge } : { purchase: false },
