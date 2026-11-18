@@ -9,11 +9,6 @@ const enrollmentFee = `non-refundable enrollment fee of $${pricing.crew_enrollme
 const mentionsFee = (name: string) =>
   registrationTypes.find(t => t.name === name)?.invitation_email_template.includes(enrollmentFee);
 
-// Open question: full-trade kitchen crew are in crewCamp, so they're charged
-// the fee, but their invitation says Lark is free with a full trade (and #14's
-// E6 expects them to owe $0). Either the invitation or crewCamp is wrong.
-const UNDECIDED = ['kitchen-full'];
-
 // Sheet row "Problem w/ Invite emails": a stray "false" in invitations (#14, G5)
 describe.each(registrationTypes.map(t => [t.name, t] as const))('the %s invitation email', (name, type) => {
   it('has no value left unfilled', () => {
@@ -28,15 +23,8 @@ describe.each(registrationTypes.map(t => [t.name, t] as const))('the %s invitati
     }
   });
 
-  if (!UNDECIDED.includes(name)) {
-    it(`mentions the enrollment fee ${crewCamp.includes(name) ? 'as crew' : 'only for crew'}`, () => {
-      expect(mentionsFee(name)).toBe(crewCamp.includes(name));
-    });
-  }
-});
-
-describe.each(UNDECIDED)('the %s invitation email', (name) => {
-  it.failing('mentions the enrollment fee its crew pay', () => {
+  // Full-trade kitchen crew pay it too (#16)
+  it(`mentions the enrollment fee ${crewCamp.includes(name) ? 'as crew' : 'only for crew'}`, () => {
     expect(mentionsFee(name)).toBe(crewCamp.includes(name));
   });
 });
