@@ -80,6 +80,14 @@ export default {
       'type': 'string',
       'format': 'email',
     },
+    // So carpools can reach each camper, not only the payer (#22)
+    'phone': {
+      'title': 'Camper phone',
+      'description': 'Optional. For carpooling: leave it blank to use the billing phone number.',
+      'type': 'string',
+      'maxLength': 20,
+      'pattern': '^\\+[0-9]+$',
+    },
     'gender': {
       'type': 'string',
       'title': 'Gender',

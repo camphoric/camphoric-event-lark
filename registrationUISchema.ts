@@ -65,6 +65,7 @@ export default {
         'first_name',
         'last_name',
         'email',
+        'phone',
         'address_different_than_payer',
         'camper_address',
         'gender',
@@ -76,6 +77,9 @@ export default {
         'name_badge',
       ],
       'camper_address': address,
+      'phone': {
+        'ui:widget': 'PhoneInput'
+      },
       'meals': {
         'meal_plan': {
           'ui:placeholder': 'Choose an option',
