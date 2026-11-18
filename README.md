@@ -22,7 +22,7 @@ scripts/smoke-test-package.sh   # pack it, install it, and load it from its buil
 ```
 
 The event's source is TypeScript; the published package is its build (`dist/`) and its report
-templates (`reports/`). The spec is a **peer dependency** (`^1.2.0`, the first with report categories), so Camphoric's importer loads
+templates (`reports/`). The spec is a **peer dependency** (`^1.3.0`, the first with an event's cancellation fee), so Camphoric's importer loads
 one copy of it for every event; a spec major this event doesn't follow fails to install rather than
 nesting a second copy. Camphoric's `RELEASE.md` ("What a spec version means") describes how a new
 spec major is rolled out.
@@ -62,14 +62,15 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
 
 - `CAMPHORIC_IMAGE_TAG` picks the release image's tag (default `latest`, pulled fresh);
   `CAMPHORIC_E2E_IMAGE` names a locally built image instead. The harness (import-tools 3) imports
-  with a personal access token it mints in the server, so the image must be Camphoric v0.18.0 or
-  later.
+  with a personal access token it mints in the server (Camphoric v0.18.0 or later), and
+  `e2e/cancellation.spec.ts` checks the event's cancellation fee (v0.19.0 or later), so the image
+  must be Camphoric v0.19.0 or later.
 - The tests need that throwaway server: its fake PayPal is what lets them pay online, so
   `CAMPHORIC_E2E_SERVER_URL` (importing into a running server) can't be used for them.
 - Every test, on desktop and mobile Chrome, shares the one imported event, so a registration one
   test completes stays.
 - `e2e/reports.spec.ts` signs in to the admin (as the throwaway server's admin, from the
-  harness's `adminCredentials()`) and opens each report in `reports.ts`. It fails on any render
+  harness's `adminCredentials()`, with `e2e/admin.ts`'s `signIn`) and opens each report in `reports.ts`. It fails on any render
   error, and on any server warning (a field the event or a Camphoric object doesn't have) but the
   known ones its `knownWarnings` lists, each tracked by an issue. It also fails a CSV report whose
   quoting is broken or whose rows don't have the header's number of fields (an unquoted comma). It
@@ -77,6 +78,10 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
   server. A warning comes only from a line some registration reaches, and every test shares the
   one event, so which show depends on what the tests have registered:
   `__tests__/reportVariables.test.ts` checks every name a template reads against the event instead.
+- `e2e/cancellation.spec.ts` signs in the same way and checks the imported event's cancellation
+  fee, and that the server offers a sample camper $150 when they're cancelled (no sample
+  registration has PayPal fees). `__tests__/cancellationFee.test.ts` checks the PayPal fees and
+  later cancellations.
 - The fixtures: `registration`, a page object for the form (fields by label, campers and their
   lists, lodging, the price ticker, the payment step); `admin`, for invitations and the email the
   server sent; and `payPal`, the orders sent to the fake PayPal. The client's markup lives only
@@ -135,13 +140,14 @@ gh workflow run upstream.yml -f force=true
 ```
 
 To run CI or E2E by hand against a given image tag (a pre-release, say) or exact package
-versions (an image of v0.18.0 or later, and import-tools 3.x: the harness mints an API token in
-the server, and earlier versions sign in with a password v0.18.0 refuses):
+versions (an image of v0.19.0 or later, for the cancellation fee test, and import-tools 3.x: the
+harness mints an API token in the server, and earlier versions sign in with a password v0.18.0
+refuses):
 
 ```bash
-gh workflow run e2e.yml -f image_tag=v0.19.0-rc.1
-gh workflow run e2e.yml -f spec_version=1.2.0 -f tools_version=3.0.0
-gh workflow run ci.yml -f spec_version=1.2.0 -f tools_version=3.0.0
+gh workflow run e2e.yml -f image_tag=v0.20.0-rc.1
+gh workflow run e2e.yml -f spec_version=1.3.0 -f tools_version=3.0.0
+gh workflow run ci.yml -f spec_version=1.3.0 -f tools_version=3.0.0
 ```
 
 A version outside this event's range works too, such as a new major or a pre-release
@@ -152,7 +158,7 @@ installs the packed package with the `spec_version` given (`tools_version` doesn
 the package doesn't depend on the tools). To do the same locally:
 
 ```bash
-SPEC_VERSION=1.2.0 scripts/smoke-test-package.sh
+SPEC_VERSION=1.3.0 scripts/smoke-test-package.sh
 ```
 
 GitHub disables scheduled workflows in a public repository after 60 days without activity; if

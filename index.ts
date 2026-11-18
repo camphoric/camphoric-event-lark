@@ -61,6 +61,11 @@ const data: EventImport = {
     pricing,
     registration_pricing_logic,
     camper_pricing_logic,
+    // offered when a camper is cancelled: $150 a camper, plus PayPal's fees on
+    // the registration's payments, those once (on the first camper cancelled)
+    cancellation_fee: {
+      '+': [150, { if: [{ var: 'first_cancellation' }, { var: 'paypal_fees' }, 0] }],
+    },
     pre_submit_template,
 
     confirmation_page_template,
