@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/camphoric/camphoric-event-lark/compare/v2.0.0...v3.0.0) (2026-11-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **event:** the import-spec peer range is now ^1.3.0, the first spec with an event's cancellation fee, so the event needs Camphoric v0.19.0 or later.
+
+### Features
+
+* **event:** offer a $150 cancellation fee plus PayPal's fees (Camphoric v0.19) ([611fb9a](https://github.com/camphoric/camphoric-event-lark/commit/611fb9af873ae91a5ea1ccf3c9ea5326112930d7)), closes [#29](https://github.com/camphoric/camphoric-event-lark/issues/29)
+
 ## [2.0.0](https://github.com/camphoric/camphoric-event-lark/compare/v1.0.1...v2.0.0) (2026-11-12)
 
 
