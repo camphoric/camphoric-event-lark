@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.1.0](https://github.com/camphoric/camphoric-event-lark/compare/v3.0.0...v3.1.0) (2026-11-18)
+
+
+### Features
+
+* **emails:** add Lark Camp's four camper group emails ([ac2fe92](https://github.com/camphoric/camphoric-event-lark/commit/ac2fe92f1991165a018600bf58b99b03d719ec46)), closes [#8](https://github.com/camphoric/camphoric-event-lark/issues/8)
+* **payments:** add Zelle and FCP Credit payment types ([93cfeaf](https://github.com/camphoric/camphoric-event-lark/commit/93cfeaf9aa2ff6c3a2d7b7782c9f73eb6c402d70)), closes [#24](https://github.com/camphoric/camphoric-event-lark/issues/24)
+* **registration-form:** ask each camper for their own phone number ([2859652](https://github.com/camphoric/camphoric-event-lark/commit/2859652fbebc609377993573b2cf05bfe891b010)), closes [#22](https://github.com/camphoric/camphoric-event-lark/issues/22)
+
+
+### Bug Fixes
+
+* **emails:** show Off Site lodging, and break lines without a backslash ([bb2eb2a](https://github.com/camphoric/camphoric-event-lark/commit/bb2eb2ad320d5740fd356b235e6ca94d3a20f9c6))
+* **invitations:** tell full-trade kitchen crew what they pay ([ffce4dd](https://github.com/camphoric/camphoric-event-lark/commit/ffce4dd516491a929ccfb26de5d6a3994811a15f)), closes [#16](https://github.com/camphoric/camphoric-event-lark/issues/16)
+* **reports:** remove the always-empty Parking Exceptions report ([6b64f59](https://github.com/camphoric/camphoric-event-lark/commit/6b64f59430bd87a24da2edec3d8050312c10832e)), closes [#21](https://github.com/camphoric/camphoric-event-lark/issues/21)
+* **reports:** send Camp 3 campers to Camp 2's kitchen in Confirmation Email Info ([2633cbe](https://github.com/camphoric/camphoric-event-lark/commit/2633cbe6575987c43bd69c248fe70eadde313c92))
+* **reports:** show a camper's meal assignment in Confirmation Email Info ([93cfb18](https://github.com/camphoric/camphoric-event-lark/commit/93cfb18fbf9b5c523b9f813951e9591c12cec0aa)), closes [#23](https://github.com/camphoric/camphoric-event-lark/issues/23)
+
 ## [3.0.0](https://github.com/camphoric/camphoric-event-lark/compare/v2.0.0...v3.0.0) (2026-11-18)
 
 
