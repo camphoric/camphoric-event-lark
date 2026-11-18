@@ -66,6 +66,13 @@ const data: EventImport = {
     cancellation_fee: {
       '+': [150, { if: [{ var: 'first_cancellation' }, { var: 'paypal_fees' }, 0] }],
     },
+    // What else a registrar can record a payment as, beside the built-in Check,
+    // PayPal, Card and Voucher (#24). Neither is online, so the confirmation
+    // page and email treat them as offline, like a check.
+    payment_types: [
+      { value: 'Zelle', label: 'Zelle' },
+      { value: 'FCP Credit', label: 'FCP Credit' },
+    ],
     pre_submit_template,
 
     confirmation_page_template,

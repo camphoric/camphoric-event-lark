@@ -82,6 +82,8 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
   fee, and that the server offers a sample camper $150 when they're cancelled (no sample
   registration has PayPal fees). `__tests__/cancellationFee.test.ts` checks the PayPal fees and
   later cancellations.
+- `e2e/paymentTypes.spec.ts` signs in the same way and checks that the server offers the event's
+  own payment types (Zelle and FCP Credit), as offline types, when a payment is recorded.
 - The fixtures: `registration`, a page object for the form (fields by label, campers and their
   lists, lodging, the price ticker, the payment step); `admin`, for invitations and the email the
   server sent; and `payPal`, the orders sent to the fake PayPal. The client's markup lives only
