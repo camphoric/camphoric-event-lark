@@ -34,7 +34,7 @@ import {
 export const eventName = `Lark Camp ${year}`;
 
 // The handling (percent) added to a payment made online, with PayPal
-export const epaymentHandling = '2.5';
+export const epaymentHandling = '3';
 
 const data: EventImport = {
   organization: 'Lark Traditional Arts',

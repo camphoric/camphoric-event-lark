@@ -22,7 +22,7 @@ import {
 //
 // The deposit (registrationDepositSchema.ts) halves only tuition and meals;
 // parking, the badge and the donation are paid in full. Paying online adds
-// the event's e-payment handling (2.5%) to what's paid now; a check doesn't.
+// the event's e-payment handling (3%) to what's paid now; a check doesn't.
 // The e2e event takes online payments through the harness's fake PayPal
 // (e2e/global-setup.ts), so nothing is paid.
 
@@ -30,8 +30,8 @@ const DEPOSIT = '50% Deposit';
 const deposit = (total: number, tuition: number, meals = 0) => total - tuition / 2 - meals / 2;
 
 // C1: the "Payment" procedure's registration: an adult, full camp, no meals
-// ($943.00 online), 2 parking passes ($1127.50), a badge ($1132.63) and $20
-// ($1153.13)
+// ($947.60 online), 2 parking passes ($1133.00), a badge ($1138.15) and $20
+// ($1158.75)
 test('the payment procedure\'s registration: full payment and deposit', async ({ registration }) => {
   const camper = await fillRequired(registration);
   await parkingPasses(camper).add();
@@ -42,10 +42,10 @@ test('the payment procedure\'s registration: full payment and deposit', async ({
   await registration.expectTotal(total);
 
   await submitExpectingDue(registration, total);
-  expect(online(total)).toBe(1153.13);
-  // A deposit's handling is on what's paid now. (#14 expects $693.13, the full
-  // online total less half the tuition, which charges handling on the half
-  // that isn't being paid.)
+  expect(online(total)).toBe(1158.75);
+  // A deposit's handling is on what's paid now. (#14 expected $693.13 at the
+  // old 2.5%: the full online total less half the tuition, which charges
+  // handling on the half that isn't being paid.)
   await registration.choosePaymentOption(DEPOSIT);
   await expectDue(registration, deposit(total, pricing.full_adult));
 });
@@ -66,15 +66,15 @@ test.fixme('going back from the payment step keeps its totals', async ({ page, r
 });
 
 // C2: on 2/18 a deposit added the donation twice. (As in C1, a deposit's
-// handling is on what's paid now: #14 expects $585.50 here and $850.63 with
-// meals, the full online total less the halves, which charges handling on
-// what isn't being paid.)
+// handling is on what's paid now: at the old 2.5%, #14 expected $585.50 here
+// and $850.63 with meals, the full online total less the halves, which charges
+// handling on what isn't being paid.)
 test('a deposit counts the donation once', async ({ registration }) => {
   await fillRequired(registration);
   await registration.fill(DONATION, '100');
   const total = pricing.full_adult + 100;
   await submitExpectingDue(registration, total);
-  expect(online(total)).toBe(1045.50);
+  expect(online(total)).toBe(1050.60);
   await registration.choosePaymentOption(DEPOSIT);
   await expectDue(registration, deposit(total, pricing.full_adult));
 });
@@ -85,7 +85,7 @@ test('a deposit with meals counts the donation once', async ({ registration }) =
   await registration.fill(DONATION, '100');
   const total = pricing.full_adult + pricing.meals_adult_full + 100;
   await submitExpectingDue(registration, total);
-  expect(online(total)).toBe(1563.13);
+  expect(online(total)).toBe(1570.75);
   await registration.choosePaymentOption(DEPOSIT);
   await expectDue(registration, deposit(total, pricing.full_adult, pricing.meals_adult_full));
 });
@@ -106,7 +106,8 @@ test('with no tuition or meals, the deposit is the whole total', async ({ page, 
 });
 
 // C4: sheet row "Rounding Error" (Meghan). Camp 1 cleanup crew in an RV, Just
-// Dinners and a parking pass: $371, $380.275 online
+// Dinners and a parking pass: $371, $382.13 online ($380.275, a half cent, at
+// the old 2.5%; at 3% a whole-dollar total has none, but the check is kept)
 test('paying by check doesn\'t round the total up', async ({ page, admin, registration }) => {
   const camper = await fillInvited(page, admin, registration, 'cleanup-camp-1');
   await camper.chooseLodging('Camp 1', 'RV', 'RV under 15\' long');
@@ -115,14 +116,15 @@ test('paying by check doesn\'t round the total up', async ({ page, admin, regist
   const total = pricing.crew_enrollment + pricing.meals_adult_dinners + pricing.crew_parking_pass;
   await registration.expectTotal(total);
   await submitExpectingDue(registration, total);
-  expect(online(total)).toBe(380.28);
+  expect(online(total)).toBe(382.13);
   await payByCheck(page, registration);
   await expect(page.getByText(`for ${money(total)}`)).toBeVisible();
 });
 
 // C5: sheet row "payment" (Mahati); M. Jones 2/20: PayPal hung at $1460.63, a
-// half cent before rounding, but not at $943.00
-for (const [what, meals, amount] of [['All Meals', mealsLookup.F, '1460.63'], ['no meals', 'No meals', '943.00']]) {
+// half cent before rounding at the old 2.5%, but not at $943.00. At 3% they're
+// $1467.75 and $947.60, neither a half cent, but the order must still match.
+for (const [what, meals, amount] of [['All Meals', mealsLookup.F, '1467.75'], ['no meals', 'No meals', '947.60']]) {
   test(`an adult with ${what} can be sent to PayPal, to the cent`, async ({ registration, payPal }) => {
     const camper = await fillRequired(registration);
     if (meals !== 'No meals') await chooseMeals(camper, meals);
