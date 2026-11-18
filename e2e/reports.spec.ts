@@ -102,8 +102,7 @@ test.skip(({ isMobile }) => isMobile, 'reports render on the server: desktop is 
 // those too (camphoric#994), but only when a registration reaches the line, so
 // whether one shows depends on what the tests have registered: a known warning
 // may show, and any other fails. Each is a fix to make, and is removed from
-// here with it. (#21's report, Campers' "Parking Exceptions", reads a registration
-// admin field that the server doesn't warn about.)
+// here with it.
 const knownWarnings: Record<string, string[]> = {
   'By Zip Code (For Carpool)': ['line 31: warning: camper.attributes has no field \'phone\''], // #22
   'Confirmation Email Info': [

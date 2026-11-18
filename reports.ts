@@ -16,12 +16,6 @@ function readFile(filename: string): string {
 // the same title, so two with one title would be imported into one.
 const reports: Report[] = [
   {
-    category: 'Campers',
-    title: 'Parking Exceptions',
-    output: 'csv',
-    template: readFile('Campers--Parking-Exceptions.j2'),
-  },
-  {
     category: 'Kitchen',
     title: 'Meal Location Exceptions',
     output: 'csv',
