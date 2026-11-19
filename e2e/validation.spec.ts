@@ -18,12 +18,10 @@ import {
 const CREDENTIALS = 'Relevant credentials and certifications';
 
 // The browser checks a required text field itself, before the form does; the
-// form checks the rest, with its "required" message (H6)
+// form checks the rest, with its "required" message (H6). Since Camphoric
+// v0.20.0 the phone field starts empty rather than holding its dial code, so
+// the browser checks it too.
 const CHECKED_BY_FORM = ['Select a camp'];
-// The phone widget always holds its dial code ("+1 "), so the browser takes it;
-// since Camphoric v0.18.0 the form counts a dial code alone as empty (found by
-// D1) and marks the field invalid itself
-const CHECKED_BY_WIDGET = ['Phone Number'];
 
 // D1: each required answer, left out by itself
 for (const field of requiredFields) {
@@ -33,9 +31,6 @@ for (const field of requiredFields) {
     const control = registration.field(field).or(camper.field(field)).first();
     if (CHECKED_BY_FORM.includes(field)) {
       await expect(camper.message(messages['*'].required).first()).toBeVisible();
-      await expectNoRawMessages(page);
-    } else if (CHECKED_BY_WIDGET.includes(field)) {
-      await expect(control).toHaveAttribute('aria-invalid', 'true');
       await expectNoRawMessages(page);
     } else {
       await expect(control).toHaveJSProperty('validity.valid', false);
