@@ -38,6 +38,19 @@ for (const field of requiredFields) {
   });
 }
 
+// D1, the phone: a dial code alone isn't a number. The browser takes "+1", so
+// the form must count it as empty (found by D1; Camphoric #986) and mark the
+// field invalid itself.
+test('a registration with only a dial code for "Phone Number" isn\'t submitted', async ({ page, registration }) => {
+  await fillRequired(registration, ['Phone Number']);
+  await registration.fill('Phone Number', '+1');
+  const control = registration.field('Phone Number').first();
+  await expect(control).toHaveJSProperty('validity.valid', true);
+  await expectRejected(page, registration);
+  await expect(control).toHaveAttribute('aria-invalid', 'true');
+  await expectNoRawMessages(page);
+});
+
 // D1, the session: it's required, and starts as Full camp, so deleting its
 // text gives the choice back rather than leaving it blank
 test('the session can\'t be left blank', async ({ page, registration }) => {
