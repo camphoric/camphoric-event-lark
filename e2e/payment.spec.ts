@@ -50,12 +50,13 @@ test('the payment procedure\'s registration: full payment and deposit', async ({
   await expectDue(registration, deposit(total, pricing.full_adult));
 });
 
-// C1: going back from the payment step and on again keeps the totals. Since
-// Camphoric v0.20.0, Back can restore the form as last saved, without a change
-// made in the 600 ms before Submit (here, the parking pass), so this fails
-// when the form saved partway through: camphoric/camphoric#1038.
-test.fixme('going back from the payment step keeps its totals', async ({ page, registration }) => {
+// C1: going back from the payment step and on again keeps the totals. The form
+// saves itself 600 ms after a change; camphoric/camphoric#1038 was Back
+// restoring that saved copy, which lost a change made just before Submit. So
+// the form saves first, and the parking pass is added just before Submit.
+test('going back from the payment step keeps its totals', async ({ page, registration }) => {
   const camper = await fillRequired(registration);
+  await page.waitForTimeout(1000);
   await parkingPasses(camper).add();
   const total = pricing.full_adult + pricing.camper_parking_pass;
   await submitExpectingDue(registration, total);
