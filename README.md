@@ -63,9 +63,10 @@ playwright show-report`, gives the HTML report (with traces) that CI uploads.
 - `CAMPHORIC_IMAGE_TAG` picks the release image's tag (default `latest`, pulled fresh);
   `CAMPHORIC_E2E_IMAGE` names a locally built image instead. The harness (import-tools 3) imports
   with a personal access token it mints in the server (Camphoric v0.18.0 or later), and
-  `e2e/cancellation.spec.ts` checks the event's cancellation fee (v0.19.0 or later), and
+  `e2e/cancellation.spec.ts` checks the event's cancellation fee (v0.19.0 or later),
   `e2e/validation.spec.ts` expects the browser to refuse an empty phone number (v0.20.0 or later),
-  so the image must be Camphoric v0.20.0 or later.
+  and `e2e/payment.spec.ts` expects going Back from the payment step to keep the last change
+  (v0.20.1 or later), so the image must be Camphoric v0.20.1 or later.
 - The tests need that throwaway server: its fake PayPal is what lets them pay online, so
   `CAMPHORIC_E2E_SERVER_URL` (importing into a running server) can't be used for them.
 - Every test, on desktop and mobile Chrome, shares the one imported event, so a registration one
@@ -148,9 +149,9 @@ gh workflow run upstream.yml -f force=true
 ```
 
 To run CI or E2E by hand against a given image tag (a pre-release, say) or exact package
-versions (an image of v0.20.0 or later, for the cancellation fee and phone number tests, and
-import-tools 3.x: the harness mints an API token in the server, and earlier versions sign in with a
-password v0.18.0 refuses):
+versions (an image of v0.20.1 or later, for the cancellation fee, phone number and going-back
+tests, and import-tools 3.x: the harness mints an API token in the server, and earlier versions
+sign in with a password v0.18.0 refuses):
 
 ```bash
 gh workflow run e2e.yml -f image_tag=v0.20.0-rc.1
