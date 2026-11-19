@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/camphoric/camphoric-event-lark/compare/v3.1.0...v3.2.0) (2026-11-19)
+
+
+### Features
+
+* **pricing:** raise the e-payment handling to 3% ([7b72f01](https://github.com/camphoric/camphoric-event-lark/commit/7b72f019f187f90be1c111fa1fff9bb7ff39a75e))
+
 ## [3.1.0](https://github.com/camphoric/camphoric-event-lark/compare/v3.0.0...v3.1.0) (2026-11-18)
 
 
